@@ -1,0 +1,72 @@
+%ul{ :class => "nav nav-pills"}
+  %li
+    %a{ :href => "#" } Main
+  %li
+    %a{ :href => "#/config" } Config
+
+%h1 {{ torrent.recommendedName }}
+/%a{:class => "btn", "href" => "#" } Back
+%table{ :class => "table" }
+  %tr
+    %th Size
+    %td {{torrent.completedBytes}}/{{torrent.dataLength}}
+  %tr
+    %th Status
+    %td {{torrent.state}}
+  %tr
+    %th Progress
+    %td {{torrent.percentComplete}}%
+  %tr
+    %th Download Rate
+    %td {{torrent.downloadRate}}
+  %tr
+    %th Upload Rate
+    %td {{torrent.uploadRate}}
+  %tr
+    %th Download Rate Limit
+    %td 
+      %form
+        %fieldset
+          %div{ :class => "input-append" }
+            %input{ :class => "span2", :type => "text", :value => "{{torrent.downloadRateLimit}}" }
+            %button{ :class => "btn", :type => "button" } Change
+  %tr
+    %th Upload Rate Limit
+    %td 
+      %form
+        %fieldset
+          %div{ :class => "input-append" }
+            %input{ :class => "span2", :type => "text", :value => "{{torrent.uploadRateLimit}}" }
+            %button{ :class => "btn", :type => "button" } Change
+  %tr
+    %th Upload Ratio
+    %td 
+      %form
+        %fieldset
+          %div{ :class => "input-append" }
+            %input{ :class => "span2", :type => "text", :value => "1" }
+            %button{ :class => "btn", :type => "button" } Change
+ 
+%h2 Files ({{torrent.info.files.length}})
+
+%table{ :class => "table" }
+  %tr
+    %th Path
+    %th Length
+  %tr{ "ng-repeat" => "file in torrent.info.files" }
+    %td {{file.path}}
+    %td {{file.length}}
+
+%h2 Peers ({{torrent.peers.length}})
+
+%table{ :class => "table" }
+  %tr
+    %th IP
+    %th Port
+    %th Upload Rate
+    %th Download Rate
+  %tr{ "ng-repeat" => "peer in torrent.peers" }
+    %td {{peer.trackerPeer.ip}}
+    %td {{peer.trackerPeer.port}}
+    %td {{peer.uploadRate}}
+    %td {{peer.downloadRate}}

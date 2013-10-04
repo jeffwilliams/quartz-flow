@@ -1,0 +1,26 @@
+:javascript
+  $('#uploadRateLabel').tooltip();
+
+%div{ :class => "row"}
+
+  %ul{ :class => "nav nav-pills"}
+    %li
+      %a{ :href => "#" } Main
+    %li{ :class => "active" }
+      %a{ :href => "#/config" } Config
+
+  %div{ :class => "alert alert-error", "ng-repeat" => "error in errors" }
+    %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
+    {{error}}
+
+  %form{ :class => "form-horizontal", "ng-submit" => "applySettings()"}
+    %div{ :class => "control-group"}
+      %label{ :id => "uploadRateLabel", :class => "control-label", :for => "uploadRate", "data-toggle" => "tooltip", :title => "Default rate limit to apply to new torrents"} Default Upload Rate Limit
+      %div{ :class => 'controls'}
+        %input{ :type => "text", :id => "uploadRate", :placeholder => "Enter rate like '20 KB'", "ng-model" => "globalSettings.defaultUploadRateLimit"}
+    %div{ :class => "control-group"}
+      %label{ :id => "downloadRateLabel", :class => "control-label", :for => "downloadRate", "data-toggle" => "tooltip", :title => "Default rate limit to apply to new torrents"} Default Upload Rate Limit
+      %div{ :class => 'controls'}
+        %input{ :type => "text", :id => "downloadRate", :placeholder => "Enter rate like '500 KB'", "ng-model" => "globalSettings.defaultDownloadRateLimit"}
+    %button{ :class => "btn", :type => "submit" } Apply
+

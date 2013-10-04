@@ -1,0 +1,17 @@
+!!! html
+%html{ "ng-app" => "quartz"}
+  %head
+    %link{ :rel => "stylesheet", :type => "text/css", :href => "/style.css"}
+    %link{ :rel => "stylesheet", :type => "text/css", :href => "/bootstrap/css/bootstrap.min.css"} 
+    %script{ :src => "http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js" }
+    %script{ :src => "http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular-resource.js" }
+    %script{ :src => "/js/quartz.js" }
+  %body
+    %h1{ :id => "mainheader"} QuartzFlow
+    %div{ :class => "container", "ng-view" => ''}
+
+    %script{ :src => "/js/jquery-1.10.2.min.js" }
+    %script{ :src => "/bootstrap/js/bootstrap.min.js"}
+
+    -# This is the file-upload iframe
+    %iframe{ :id => "uploadiframe", :name => "uploadiframe", :onload => 'handleIframeLoad("uploadiframe")' }
