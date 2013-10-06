@@ -26,6 +26,7 @@ class Server < Sinatra::Base
     set :torrent_port, 9996
     set :db_file, "db/quartz.sqlite"
     set :torrent_log, "log/torrent.log"
+    set :logging, true
 
     # Load configuration settings
     eval File.open("./etc/quartz.rb","r").read
@@ -36,8 +37,11 @@ class Server < Sinatra::Base
     raise "The metadir '#{settings.metadir}' does not exist. Please create it." if ! File.directory? settings.metadir
 
     QuartzTorrent::LogManager.initializeFromEnv
-    QuartzTorrent::LogManager.logFile = settings.torrent_log
-    QuartzTorrent::LogManager.defaultLevel = :info
+    logfile = settings.torrent_log
+    QuartzTorrent::LogManager.setup do
+      setLogfile logfile
+      setDefaultLevel :info
+    end
     QuartzTorrent::LogManager.setLevel "peer_manager", :debug
     QuartzTorrent::LogManager.setLevel "tracker_client", :debug
     QuartzTorrent::LogManager.setLevel "http_tracker_client", :debug
