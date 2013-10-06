@@ -5,10 +5,11 @@ Gem::Specification.new do |s|
   s.summary     = "A web-based bittorrent client"
   s.description = "A web-based bittorrent client"
   s.authors     = ["Jeff Williams"]
-  s.files       = Dir['bin/*.rb'] + Dir['public/**/*.{css,js,png}'] + Dir['views/*.haml'] + Dir['lib/**/*.rb']  + Dir['etc/*.rb']
+  s.files       = Dir['bin/*'] + Dir['public/**/*.{css,js,png}'] + Dir['views/*.haml'] + Dir['lib/**/*.rb']  + Dir['etc/*.rb']
   s.homepage    =
     'https://github.com/jeffwilliams/quartz-torrent'
   s.has_rdoc = false
+  s.executables = ["quartzflow"]
 
   s.add_runtime_dependency "quartz_torrent"
   s.add_runtime_dependency "data_mapper", '~> 1.2'

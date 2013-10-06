@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'quartz_flow/model'
 
 # Class used to setup a new QuartzFlow home directory, and get information about it.
 class Home
@@ -11,6 +12,7 @@ class Home
       "download",
       "meta",
       "public",
+      "db",
       "views",
     ]
 
@@ -45,6 +47,13 @@ class Home
         end
       end
     end
+
+    # Create database
+    puts "Creating database file"
+    path = "sqlite://#{File.expand_path(@dir)}/db/quartz.sqlite"
+    DataMapper.setup(:default, path)
+
+    DataMapper.auto_migrate!
   end
 
   def self.determineAppRoot(gemname)
