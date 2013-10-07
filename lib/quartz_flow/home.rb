@@ -49,11 +49,16 @@ class Home
     end
 
     # Create database
-    puts "Creating database file"
-    path = "sqlite://#{File.expand_path(@dir)}/db/quartz.sqlite"
-    DataMapper.setup(:default, path)
+    dbFile = "#{File.expand_path(@dir)}/db/quartz.sqlite"
+    if ! File.exists?(dbFile)
+      puts "Creating database file"
+      path = "sqlite://#{File.expand_path(@dir)}/db/quartz.sqlite"
+      DataMapper.setup(:default, path)
+      DataMapper.auto_migrate!
+    else
+      puts "Database file already exists. Skipping creation."
+    end
 
-    DataMapper.auto_migrate!
   end
 
   def self.determineAppRoot(gemname)
