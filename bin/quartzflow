@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'getoptlong'
 require 'quartz_flow/home'
+require 'quartz_torrent'
 
 def doSetup
   home = "."
@@ -66,7 +67,32 @@ if command == :setup
   doSetup
 elsif command == :start
   exit 1 if ! Home.new.validate
+
+  QuartzTorrent.initThread("main")
+
   require 'quartz_flow/server'
+
+  Thread.new do
+    begin
+      puts "Starting thread"
+      stdout = $stdout
+      io = File.open('/dev/pts/0','w')
+      until Server.running?
+        io.puts "Not running"
+        sleep 1
+      end
+
+      if Signal.list.has_key?('USR1')
+        puts "Registering SIGUSR1 handler"
+        Signal.trap('SIGUSR1') { QuartzTorrent.logBacktraces($stdout) }
+        Signal.trap('SIGQUIT') { QuartzTorrent.logBacktraces($stdout) }
+      end 
+    rescue
+      puts $!
+      puts $!.backtrace.join "\n"
+    end
+  end
+
   Server.run!
 elsif command == :help
   doHelp
