@@ -3,7 +3,7 @@
 var quartzModule = angular.module('quartz',[]);
 
 /* Set up URL routes. Different URLs map to different HTML fragments (templates)*/
-quartzModule.config(function($routeProvider, $httpProvider) {
+quartzModule.config(function($routeProvider) {
   $routeProvider.
     when('/', {controller: TorrentTableCtrl, templateUrl:'/torrent_table'}).
     when('/details/:torrent', {controller: TorrentDetailsCtrl, templateUrl:'/torrent_detail'}).
@@ -15,16 +15,24 @@ quartzModule.config(function($routeProvider, $httpProvider) {
 /* Set up function that keeps retrieving torrent data from server on a timer.
    We store the data in the rootScope which means it's available in all scopes. */
 quartzModule.run(function($rootScope, $timeout, $http) {
+  $rootScope.errors = [];
+
   // Load the list of torrent data every 1 second.
   var refresh = function() {
     // http://code.angularjs.org/1.0.8/docs/api/ng.$http
-    $http.get("/torrent_data").
+    $http.get("/torrent_data", {'timeout': 3000}).
       success(function(data,status,headers,config){
         $rootScope.torrents = data;
         updateTableTorrentData($rootScope);
       }).
       error(function(data,status,headers,config){
         $rootScope.torrents = [];
+        updateTableTorrentData($rootScope);
+        msg = "Server is unreachable."
+        if($rootScope.errors.length < 5 && $rootScope.errors.indexOf(msg) == -1) {
+          $rootScope.errors.push(msg);
+          console.log("get /torrent_data error: " + status);
+        }
       });
 
     $timeout(refresh, 1000);
@@ -33,8 +41,12 @@ quartzModule.run(function($rootScope, $timeout, $http) {
 });
 
 /* Controller for the torrent table view */
-function TorrentTableCtrl($scope, $timeout, $http) {
+function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
   $scope.errors = [];
+
+  $scope.rootErrors = function() {
+    return $rootScope.errors;
+  };
 
   var checkIframeMessages = function() {
     while( iframeUploadResultMessages.length > 0 ) {
@@ -52,6 +64,12 @@ function TorrentTableCtrl($scope, $timeout, $http) {
     for(var i = 0; i < $scope.errors.length; i++) {
       if ( $scope.errors[i] == err ) {
         $scope.errors.splice(i,1);
+        break;
+      }
+    }
+    for(var i = 0; i < $rootScope.errors.length; i++) {
+      if ( $rootScope.errors[i] == err ) {
+        $rootScope.errors.splice(i,1);
         break;
       }
     }
@@ -110,6 +128,10 @@ function TorrentTableCtrl($scope, $timeout, $http) {
   
   $scope.stateForDisplay = function(infoHash){
     var torrent = $scope.torrents[infoHash];
+    if ( ! torrent ){
+      return "unknown";      
+    }
+
     var result = torrent.state;
 
     if ( torrent.paused ){
