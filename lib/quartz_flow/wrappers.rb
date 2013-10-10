@@ -78,12 +78,13 @@ module QuartzTorrent
       result[:completedBytes] = @completedBytes
       result[:peers] = @peers.collect{ |p| p.to_h }
       result[:state] = @state
-      result[:completePieceBitfield] = @completePieceBitfield
+      #result[:completePieceBitfield] = @completePieceBitfield
       result[:metainfoLength] = @metainfoLength
       result[:metainfoCompletedLength] = @metainfoCompletedLength
       result[:paused] = @paused
       result[:uploadRateLimit] = @uploadRateLimit
       result[:downloadRateLimit] = @downloadRateLimit
+      result[:ratio] = @ratio
 
       result
     end

@@ -4,6 +4,14 @@
   %li
     %a{ :href => "#/config" } Config
 
+%div{ :class => "alert alert-error", "ng-repeat" => "error in rootErrors()" }
+  %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
+  {{error}}
+
+%div{ :class => "alert alert-error", "ng-repeat" => "error in errors" }
+  %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
+  {{error}}
+
 %h1 {{ torrent.recommendedName }}
 /%a{:class => "btn", "href" => "#" } Back
 %table{ :class => "table" }
@@ -25,27 +33,27 @@
   %tr
     %th Download Rate Limit
     %td 
-      %form
+      %form{ "ng-submit" => "applyDownloadRateLimit()" }
         %fieldset
           %div{ :class => "input-append" }
-            %input{ :class => "span2", :type => "text", :value => "{{torrent.downloadRateLimit}}" }
-            %button{ :class => "btn", :type => "button" } Change
+            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.downloadRateLimit" }
+            %button{ :class => "btn", :type => "submit" } Change
   %tr
     %th Upload Rate Limit
     %td 
       %form
         %fieldset
           %div{ :class => "input-append" }
-            %input{ :class => "span2", :type => "text", :value => "{{torrent.uploadRateLimit}}" }
-            %button{ :class => "btn", :type => "button" } Change
+            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.uploadRateLimit" }
+            %button{ :class => "btn", :type => "submit" } Change
   %tr
     %th Upload Ratio
     %td 
       %form
         %fieldset
           %div{ :class => "input-append" }
-            %input{ :class => "span2", :type => "text", :value => "1" }
-            %button{ :class => "btn", :type => "button" } Change
+            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.ratio" }
+            %button{ :class => "btn", :type => "submit" } Change
  
 %h2 Files ({{torrent.info.files.length}})
 

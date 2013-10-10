@@ -8,7 +8,6 @@ end
 
 require 'haml'
 require 'json'
-#require 'quartz_flow/mock_client'
 require 'quartz_torrent'
 require 'quartz_flow/wrappers'
 require 'quartz_flow/torrent_manager'
@@ -16,6 +15,19 @@ require 'quartz_flow/settings_helper'
 require 'fileutils'
 
 require 'sinatra/base'
+
+class LogConfigurator
+  def self.set(logger, level)
+    QuartzTorrent::LogManager.setLevel logger, level
+  end
+
+  def self.configLevels
+    # Load configuration settings
+    path = "./etc/logging.rb"
+    return if ! File.exists?(path)
+    eval File.open(path,"r").read
+  end
+end
 
 class Server < Sinatra::Base
 
@@ -42,17 +54,7 @@ class Server < Sinatra::Base
       setLogfile logfile
       setDefaultLevel :info
     end
-    QuartzTorrent::LogManager.setLevel "peer_manager", :debug
-    QuartzTorrent::LogManager.setLevel "tracker_client", :debug
-    QuartzTorrent::LogManager.setLevel "http_tracker_client", :debug
-    QuartzTorrent::LogManager.setLevel "udp_tracker_client", :debug
-    QuartzTorrent::LogManager.setLevel "peerclient", :debug
-    QuartzTorrent::LogManager.setLevel "peerclient.reactor", :info
-    #LogManager.setLevel "peerclient.reactor", :debug
-    QuartzTorrent::LogManager.setLevel "blockstate", :debug
-    QuartzTorrent::LogManager.setLevel "piecemanager", :info
-    QuartzTorrent::LogManager.setLevel "peerholder", :debug
-
+    LogConfigurator.configLevels
     peerClient = QuartzTorrent::PeerClient.new(settings.basedir)
     peerClient.port = settings.torrent_port
     peerClient.start
@@ -199,7 +201,11 @@ class Server < Sinatra::Base
     deleteFiles = json["delete_files"]
     halt 500, "Deleting torrent failed: no delete_files parameter was sent to the server in the post request." if deleteFiles.nil?
 
-    $manager.removeTorrent infoHash, deleteFiles
+    begin
+      $manager.removeTorrent infoHash, deleteFiles
+    rescue
+      halt 500, "Removing torrent failed: #{$!}"
+    end
     
     "OK"
   end
@@ -214,7 +220,34 @@ class Server < Sinatra::Base
   post "/global_settings" do
     helper = SettingsHelper.new
     json = JSON.parse(request.body.read)
-    helper.setGlobalSettingsHash(json)
+    begin
+      helper.setGlobalSettingsHash(json)
+    rescue
+      halt 500, "Saving global settings failed: #{$!}"
+    end
+    "OK"
+  end
+
+  post "/change_torrent" do
+    helper = SettingsHelper.new
+    json = JSON.parse(request.body.read)
+
+    asciiInfoHash = json['infoHash']
+    halt 500, "Saving torrent settings failed: no infoHash parameter was sent to the server in the post request." if ! asciiInfoHash
+  
+    json.each do |k,v|
+      next if k == 'infoHash'
+      begin
+        helper.set k, v, asciiInfoHash
+      rescue
+        halt 500, "Saving torrent settings failed: #{$!}"
+      end
+    end
+
+    infoHash = QuartzTorrent::hexToBytes(asciiInfoHash)
+    $manager.applyTorrentSettings infoHash
+
+    "OK"
   end
 
 end

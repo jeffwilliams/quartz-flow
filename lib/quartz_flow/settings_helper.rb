@@ -32,6 +32,11 @@ class SettingsHelper
     end
   end
 
+  @@floatValidator = Proc.new do |v|
+    raise "Invalid ratio" if v !~ /^\d+(\.\d+)?$/
+    v.to_s
+  end
+
   @@settingsMetainfo = {
     :defaultUploadRateLimit => SettingMetainfo.new(
       :defaultUploadRateLimit,
@@ -45,9 +50,33 @@ class SettingsHelper
       Proc.new{ |v| QuartzTorrent::Formatter.parseSize(v) },
       Proc.new{ |v| QuartzTorrent::Formatter.formatSpeed(v) }
     ),
+    :defaultRatio => SettingMetainfo.new(
+      :defaultRatio,
+      :global,
+      @@floatValidator,
+      Proc.new{ |v| v.to_f }
+    ),
+    :uploadRateLimit => SettingMetainfo.new(
+      :uploadRateLimit,
+      :torrent,
+      Proc.new{ |v| QuartzTorrent::Formatter.parseSize(v) },
+      Proc.new{ |v| QuartzTorrent::Formatter.formatSpeed(v) }
+    ),
+    :downloadRateLimit => SettingMetainfo.new(
+      :downloadRateLimit,
+      :torrent,
+      Proc.new{ |v| QuartzTorrent::Formatter.parseSize(v) },
+      Proc.new{ |v| QuartzTorrent::Formatter.formatSpeed(v) }
+    ),
+    :ratio => SettingMetainfo.new(
+      :ratio,
+      :torrent,
+      @@floatValidator,
+      Proc.new{ |v| v.to_f }
+    ),
   }
 
-  def set(settingName, value)
+  def set(settingName, value, owner = nil)
     setting = settingName.to_sym
 
     metaInfo = @@settingsMetainfo[setting]
@@ -57,22 +86,24 @@ class SettingsHelper
     value = value.to_s if value
     value = metaInfo.filterOnSave(value)
     
-    settingModel = Setting.first(:name => settingName)
+    settingModel = loadWithOwner(settingName, owner)
+
     if ! settingModel
-      Setting.create( :name => settingName, :value => value, :scope => metaInfo.scope )
+      Setting.create( :name => settingName, :value => value, :scope => metaInfo.scope, :owner => owner )
     else
       settingModel.value = value
       settingModel.save
     end
   end
 
-  def get(settingName, filter = :filter)
+  def get(settingName, filter = :filter, owner = nil)
     setting = settingName.to_sym
     metaInfo = @@settingsMetainfo[setting]
     raise "Unknown setting #{settingName}" if ! metaInfo
 
     result = nil
-    settingModel = Setting.first(:name => settingName)
+    settingModel = loadWithOwner(settingName, owner)
+    
     if settingModel
       result = settingModel.value
       result = metaInfo.filterOnLoad(result) if filter == :filter
@@ -80,11 +111,16 @@ class SettingsHelper
     result
   end
 
+  def deleteForOwner(owner)
+    Setting.all(:owner => owner).destroy!
+  end
+
   # Return a hashtable of all global settings
   def globalSettingsHash
     result = {}
 
     @@settingsMetainfo.each do |k,v|
+      next if v.scope != :global
       result[k] = get(k)
     end
     
@@ -96,6 +132,14 @@ class SettingsHelper
     @@settingsMetainfo.each do |k,v|
       set(k, hash[k.to_s]) if hash.has_key?(k.to_s)
     end
-    
+  end
+
+  private
+  def loadWithOwner(settingName, owner)
+    if owner
+      Setting.first(:name => settingName, :owner => owner)
+    else
+      Setting.first(:name => settingName)
+    end
   end
 end

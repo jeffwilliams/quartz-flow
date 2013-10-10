@@ -63,6 +63,13 @@ class TorrentManager
         p[:uploadRate] = QuartzTorrent::Formatter.formatSpeed(p[:uploadRate])
         p[:downloadRate] = QuartzTorrent::Formatter.formatSpeed(p[:downloadRate])
       end
+      if h[:info] 
+        h[:info][:files].each do |file|
+          file[:length] = QuartzTorrent::Formatter.formatSize(file[:length])
+        end
+      end
+      h[:uploadRateLimit] = QuartzTorrent::Formatter.formatSpeed(h[:uploadRateLimit])
+      h[:downloadRateLimit] = QuartzTorrent::Formatter.formatSize(h[:downloadRateLimit])
       result[asciiInfoHash] = h
     end
     result
@@ -147,10 +154,34 @@ class TorrentManager
         end
       end
     end
-    
+ 
+    # Remove torrent settings
+    helper = SettingsHelper.new
+    helper.deleteForOwner infoHash
+   
     # Remove magnet file if it exists
     magnetFile = @torrentFileDir + File::SEPARATOR + infoHash + ".magnet"
     FileUtils.rm magnetFile if File.exists?(magnetFile)
+  end
+
+  # Update the torrent settings (upload rate limit, etc) from database values
+  def applyTorrentSettings(infoHash)
+    asciiInfoHash = QuartzTorrent::bytesToHex(infoHash)
+    helper = SettingsHelper.new
+
+    # Set limits based on per-torrent settings if they exist, otherwise to default global limits if they exist.
+    uploadRateLimit = to_i(helper.get(:uploadRateLimit, :unfiltered, asciiInfoHash))
+    uploadRateLimit = to_i(helper.get(:defaultUploadRateLimit, :unfiltered)) if ! uploadRateLimit
+
+    downloadRateLimit = to_i(helper.get(:downloadRateLimit, :unfiltered, asciiInfoHash))
+    downloadRateLimit = to_i(helper.get(:defaultDownloadRateLimit, :unfiltered)) if ! downloadRateLimit
+
+    ratio = helper.get(:ratio, :filter, asciiInfoHash)
+    ratio = helper.get(:defaultRatio, :filter) if ! ratio
+
+    @peerClient.setUploadRateLimit infoHash, uploadRateLimit
+    @peerClient.setDownloadRateLimit infoHash, downloadRateLimit
+    @peerClient.setUploadRatio infoHash, ratio
   end
 
   private
@@ -158,10 +189,9 @@ class TorrentManager
   # @peerClient, and return the infoHash.
   def startTorrent
     raise "Torrent client is shutting down" if @peerClientStopped
-    helper = SettingsHelper.new
     infoHash = yield 
-    @peerClient.setUploadRateLimit infoHash, to_i(helper.get(:defaultUploadRateLimit, :unfiltered))
-    @peerClient.setDownloadRateLimit infoHash, to_i(helper.get(:defaultDownloadRateLimit, :unfiltered))
+
+    applyTorrentSettings infoHash
   end
 
   def to_i(val)

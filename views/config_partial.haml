@@ -22,5 +22,9 @@
       %label{ :id => "downloadRateLabel", :class => "control-label", :for => "downloadRate", "data-toggle" => "tooltip", :title => "Default rate limit to apply to new torrents"} Default Download Rate Limit
       %div{ :class => 'controls'}
         %input{ :type => "text", :id => "downloadRate", :placeholder => "Enter rate like '500 KB'", "ng-model" => "globalSettings.defaultDownloadRateLimit"}
+    %div{ :class => "control-group"}
+      %label{ :id => "ratioLabel", :class => "control-label", :for => "ratio", "data-toggle" => "tooltip", :title => "Default upload ratio to apply to new torrents"} Default Upload Ratio
+      %div{ :class => 'controls'}
+        %input{ :type => "text", :id => "ratio", :placeholder => "Enter decimal number like '1.5'", "ng-model" => "globalSettings.defaultRatio"}
     %button{ :class => "btn", :type => "submit" } Apply
 

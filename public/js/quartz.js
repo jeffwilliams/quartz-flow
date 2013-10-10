@@ -17,18 +17,29 @@ quartzModule.config(function($routeProvider) {
 quartzModule.run(function($rootScope, $timeout, $http) {
   $rootScope.errors = [];
 
+  $rootScope.deleteRootscopeError = function(err){
+    for(var i = 0; i < $rootScope.errors.length; i++) {
+      if ( $rootScope.errors[i] == err ) {
+        $rootScope.errors.splice(i,1);
+        break;
+      }
+    }
+  }
+
   // Load the list of torrent data every 1 second.
   var refresh = function() {
     // http://code.angularjs.org/1.0.8/docs/api/ng.$http
+
+    var msg = "Server is unreachable.";
     $http.get("/torrent_data", {'timeout': 3000}).
       success(function(data,status,headers,config){
         $rootScope.torrents = data;
         updateTableTorrentData($rootScope);
+        $rootScope.deleteRootscopeError(msg);
       }).
       error(function(data,status,headers,config){
         $rootScope.torrents = [];
         updateTableTorrentData($rootScope);
-        msg = "Server is unreachable."
         if($rootScope.errors.length < 5 && $rootScope.errors.indexOf(msg) == -1) {
           $rootScope.errors.push(msg);
           console.log("get /torrent_data error: " + status);
@@ -61,18 +72,7 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
   $timeout(checkIframeMessages, 1000);
 
   $scope.deleteError = function(err){
-    for(var i = 0; i < $scope.errors.length; i++) {
-      if ( $scope.errors[i] == err ) {
-        $scope.errors.splice(i,1);
-        break;
-      }
-    }
-    for(var i = 0; i < $rootScope.errors.length; i++) {
-      if ( $rootScope.errors[i] == err ) {
-        $rootScope.errors.splice(i,1);
-        break;
-      }
-    }
+    genericDeleteError($scope, err);
   }
 
   $scope.getTimes = function(n){
@@ -197,12 +197,31 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
 }
 
 /* Controller for the torrent details view */
-function TorrentDetailsCtrl($scope, $routeParams) {
+function TorrentDetailsCtrl($scope, $routeParams, $http) {
   $scope.torrent = $scope.torrentsForTable[$routeParams.torrent]
+
+  $scope.deleteError = function(err){
+    genericDeleteError($scope, err);
+  }
+
+  $scope.applyDownloadRateLimit = function(){
+    $http.post("/change_torrent", {"infoHash": $scope.torrent.infoHash, "downloadRateLimit" : $scope.torrent.downloadRateLimit}).
+      success(function(data,status,headers,config){
+        console.log("huzzah, changing setting succeeded");
+      }).
+      error(function(data,status,headers,config){
+        $scope.errors.push(data);
+      });   
+  }
+
 }
 
 /* Controller for the config view */
 function ConfigCtrl($scope, $timeout, $http) {
+  $scope.deleteError = function(err){
+    genericDeleteError($scope, err);
+  }
+
   $http.get("/global_settings").
     success(function(data,status,headers,config){
       $scope.globalSettings = data;
@@ -222,6 +241,8 @@ function ConfigCtrl($scope, $timeout, $http) {
       });
   }
 }
+
+var torrentPropsNotToUpdate = { 'downloadRateLimit': 1 };
 
 /* Helper used to update the $scope's list of torrent data shown in the table 
    from the full data retrieved from the server */
@@ -245,7 +266,7 @@ function updateTableTorrentData($scope) {
         existing = $scope.torrentsForTable[key];
         for (var prop in torrent) {
           if (torrent.hasOwnProperty(prop)) {
-            if (existing[prop] != torrent[prop])
+            if (existing[prop] != torrent[prop] && !torrentPropsNotToUpdate[prop])
               existing[prop] = torrent[prop];
           }
         }
@@ -304,6 +325,16 @@ function clone(obj) {
     }
   }
   return result;
+}
+
+function genericDeleteError($scope, err) {
+  for(var i = 0; i < $scope.errors.length; i++) {
+    if ( $scope.errors[i] == err ) {
+      $scope.errors.splice(i,1);
+      break;
+    }
+  }
+  $scope.deleteRootscopeError(err);
 }
 
 /*********** IFRAME AJAX UPLOAD *************/
