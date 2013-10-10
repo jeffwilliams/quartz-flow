@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 require 'getoptlong'
-require 'quartz_flow/home'
 require 'quartz_torrent'
 
 def doSetup
@@ -64,8 +63,12 @@ if ARGV.size > 0
 end
 
 if command == :setup
+  # home is slow to load since it loads the model and calls DataMapper.finalize, so we require it only when needed
+  require 'quartz_flow/home'
   doSetup
 elsif command == :start
+  # home is slow to load since it loads the model and calls DataMapper.finalize, so we require it only when needed
+  require 'quartz_flow/home'
   exit 1 if ! Home.new.validate
 
   QuartzTorrent.initThread("main")
