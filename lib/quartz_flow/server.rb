@@ -17,9 +17,6 @@ require 'quartz_flow/session'
 require 'fileutils'
 require 'sinatra/base'
 
-# Disable authentication. FOR DEVELOPMENT ONLY!
-$USE_AUTHENTICATION = true
-
 class LogConfigurator
   def self.set(logger, level)
     QuartzTorrent::LogManager.setLevel logger, level
@@ -74,7 +71,7 @@ class Server < Sinatra::Base
 
   before do
     # Redirect to login if not authenticated
-    if $USE_AUTHENTICATION
+    if $useAuthentication
       sid = session[:sid]
       if ! SessionStore.instance.valid_session?(sid)
         session[:redir] = request.path_info

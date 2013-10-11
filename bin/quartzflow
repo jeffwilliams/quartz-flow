@@ -32,8 +32,9 @@ end
 def doHelp
   if ARGV.size == 0
     puts "Used to manage or start quartzflow."
-    puts "Usage: #{$0} <command> [options]"
+    puts "Usage: #{$0} [command] [options]"
     puts ""
+    puts "If no command is specified, start is assumed."
     puts "For help with a specific command, use 'help command'. The available commands are:"
     puts "  start     Start quartzflow"
     puts "  setup     Setup a new quartzflow home directory"
@@ -103,22 +104,20 @@ def doAddUser
   auth.add_account(login, passwd1)
 end
 
-command = :start
-
-if ARGV.size > 0
-  command = ARGV.shift.to_sym
-end
-
-if command == :setup
-  # home is slow to load since it loads the model and calls DataMapper.finalize, so we require it only when needed
-  require 'quartz_flow/home'
-  doSetup
-elsif command == :start
-  # home is slow to load since it loads the model and calls DataMapper.finalize, so we require it only when needed
-  require 'quartz_flow/home'
-  exit 1 if ! Home.new.validate
-
+def doStart
   QuartzTorrent.initThread("main")
+
+  opts = GetoptLong.new(
+    [ '--noauth', '-n', GetoptLong::NO_ARGUMENT],
+  )
+
+  $useAuthentication = true
+  opts.each do |opt, arg|
+    if opt == '--noauth'
+      $useAuthentication = false
+      puts "Warning: running without user authentication. This is not secure"
+    end
+  end
 
   require 'quartz_flow/server'
 
@@ -144,6 +143,24 @@ elsif command == :start
   end
 
   Server.run!
+end
+
+command = :start
+
+if ARGV.size > 0
+  command = ARGV.shift.to_sym
+end
+
+if command == :setup
+  # home is slow to load since it loads the model and calls DataMapper.finalize, so we require it only when needed
+  require 'quartz_flow/home'
+  doSetup
+elsif command == :start
+  # home is slow to load since it loads the model and calls DataMapper.finalize, so we require it only when needed
+  require 'quartz_flow/home'
+  exit 1 if ! Home.new.validate
+
+  doStart
 elsif command == :help
   doHelp
 elsif command == :adduser
