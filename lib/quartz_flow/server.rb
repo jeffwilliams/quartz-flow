@@ -12,9 +12,13 @@ require 'quartz_torrent'
 require 'quartz_flow/wrappers'
 require 'quartz_flow/torrent_manager'
 require 'quartz_flow/settings_helper'
+require 'quartz_flow/authentication'
+require 'quartz_flow/session'
 require 'fileutils'
-
 require 'sinatra/base'
+
+# Disable authentication. FOR DEVELOPMENT ONLY!
+$USE_AUTHENTICATION = true
 
 class LogConfigurator
   def self.set(logger, level)
@@ -30,14 +34,15 @@ class LogConfigurator
 end
 
 class Server < Sinatra::Base
-
   configure do
+    enable :sessions
     set :bind, '0.0.0.0'
     set :port, 4444
     set :basedir, "download" 
     set :torrent_port, 9996
     set :db_file, "db/quartz.sqlite"
     set :torrent_log, "log/torrent.log"
+    set :password_file, "etc/passwd"
     set :logging, true
 
     # Load configuration settings
@@ -65,6 +70,42 @@ class Server < Sinatra::Base
 
     $manager = TorrentManager.new(peerClient, settings.metadir)
     $manager.startExistingTorrents
+  end
+
+  before do
+    # Redirect to login if not authenticated
+    if $USE_AUTHENTICATION
+      sid = session[:sid]
+      if ! SessionStore.instance.valid_session?(sid)
+        session[:redir] = request.path_info
+        request.path_info = "/login"
+      end
+    end
+  end
+
+  get "/login" do
+    haml :login
+  end
+
+  post "/login" do
+    json = JSON.parse(request.body.read)
+    halt 500, "Missing login" if ! json['login']
+    halt 500, "Missing password" if ! json['password']
+
+    auth = Authentication.new settings.password_file
+    if auth.authenticate json['login'], json['password']
+      sid = SessionStore.instance.start_session(params[:login].to_s)
+      session[:sid] = sid
+    else
+      halt 500, "Invalid login or password"
+    end
+    "OK"
+  end
+
+  post "/logout" do
+    SessionStore.instance.end_session(session[:sid])
+    session.delete :sid
+    "OK"
   end
 
   get "/" do

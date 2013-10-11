@@ -35,8 +35,9 @@ def doHelp
     puts "Usage: #{$0} <command> [options]"
     puts ""
     puts "For help with a specific command, use 'help command'. The available commands are:"
-    puts "  start   Start quartzflow"
-    puts "  setup   Setup a new quartzflow home directory"
+    puts "  start     Start quartzflow"
+    puts "  setup     Setup a new quartzflow home directory"
+    puts "  adduser   Add a user"
   else
     command = ARGV.shift
     if command == "setup"
@@ -50,10 +51,56 @@ def doHelp
     elsif command == "start"
       puts "Start quartzflow. When run without options, the current directory should be a"
       puts "quartzflow home directory, as created using the setup command."
+    elsif command == "adduser"
+      puts "Add a user. This command must be run with the --login option."
+      puts ""
+      puts "Options:"
+      puts "  --login LOGIN, -l LOGIN     Login name for the user to be added"
     else
       puts "Unknown command"
     end
   end
+end
+
+def doAddUser
+  isLinux = RUBY_PLATFORM.downcase.include?("linux")
+
+  opts = GetoptLong.new(
+    [ '--login', '-l', GetoptLong::REQUIRED_ARGUMENT],
+  )
+
+  login = nil
+  opts.each do |opt, arg|
+    if opt == '--login'
+      login = arg
+    end
+  end
+
+  if ! login
+    puts "The --login option is required for the adduser command"
+    exit 1
+  end
+
+  system "stty -echo" if isLinux
+
+  print "Password: "
+  $stdout.flush
+  passwd1 = $stdin.gets.strip
+  puts
+  print "Password again: "
+  $stdout.flush
+  passwd2 = $stdin.gets.strip
+  puts
+
+  system "stty echo" if isLinux
+
+  if passwd1 != passwd2
+    puts "Passwords don't match"
+    exit 1
+  end
+
+  auth = Authentication.new("etc/passwd")
+  auth.add_account(login, passwd1)
 end
 
 command = :start
@@ -99,6 +146,9 @@ elsif command == :start
   Server.run!
 elsif command == :help
   doHelp
+elsif command == :adduser
+  require 'quartz_flow/authentication'
+  doAddUser
 else
   puts "Unknown command #{command}"
 end

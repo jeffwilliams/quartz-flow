@@ -7,7 +7,10 @@
     %script{ :src => "http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular-resource.js" }
     %script{ :src => "/js/quartz.js" }
   %body
-    %h1{ :id => "mainheader"} QuartzFlow
+    %h1{ :id => "mainheader", "ng-controller" => "LoginCtrl"}
+      QuartzFlow
+      %button{ :type => "button", :class => "btn btn-mini", :id => "logout", "ng-click" => "doLogout()" } logout
+
     %div{ :class => "container", "ng-view" => ''}
 
     %script{ :src => "/js/jquery-1.10.2.min.js" }

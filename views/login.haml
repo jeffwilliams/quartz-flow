@@ -1,0 +1,32 @@
+!!! html
+%html{ "ng-app" => ""}
+  %head
+    %link{ :rel => "stylesheet", :type => "text/css", :href => "/style.css"}
+    %link{ :rel => "stylesheet", :type => "text/css", :href => "/bootstrap/css/bootstrap.min.css"} 
+    %script{ :src => "http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js" }
+    %script{ :src => "http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular-resource.js" }
+    %script{ :src => "/js/quartz.js" }
+  %body
+    %h1{ :id => "mainheader"} QuartzFlow
+
+    %div{ :class => "container", "ng-controller" => "LoginCtrl"}
+      %div{ :class => "alert alert-error", "ng-repeat" => "error in rootErrors()" }
+        %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
+        {{error}}
+
+      %div{ :class => "alert alert-error", "ng-repeat" => "error in errors" }
+        %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
+        {{error}}
+
+      %form{ :role => "form", "ng-submit" => "doLogin()" }
+        %div{ :class => "form-group" }
+          %label{ :for => "login" } Login
+          %input{ :type => "text", :class => "form-control", :id => "login", :placeholder => "Enter login", "ng-model" => "login" }
+        %div{ :class => "form-group" }
+          %label{ :for => "password" } Password
+          %input{ :type => "password", :class => "form-control", :id => "password", :placeholder => "Enter password", "ng-model" => "password" }
+        %button{ :class => "btn", :type => "submit" } Login
+
+    %script{ :src => "/js/jquery-1.10.2.min.js" }
+    %script{ :src => "/bootstrap/js/bootstrap.min.js"}
+

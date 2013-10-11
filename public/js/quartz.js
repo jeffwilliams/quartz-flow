@@ -242,6 +242,38 @@ function ConfigCtrl($scope, $timeout, $http) {
   }
 }
 
+/* Controller used for login */
+function LoginCtrl($scope, $window, $http) {
+  $scope.errors = [];
+  $scope.login = null;
+  $scope.password = null;
+
+  $scope.doLogin = function(){
+    $http.post("/login", {"login": $scope.login, "password" : $scope.password}).
+      success(function(data,status,headers,config){
+        $window.location.href = '/';
+      }).
+      error(function(data,status,headers,config){
+        $scope.errors.push(data);
+      });   
+  }
+
+  $scope.doLogout = function(){
+    $http.post("/logout").
+      success(function(data,status,headers,config){
+        $window.location.href = '/';
+      }).
+      error(function(data,status,headers,config){
+        $window.location.href = '/';
+      });   
+  }
+
+  $scope.deleteRootscopeError = function(err){}
+  $scope.deleteError = function(err){
+    genericDeleteError($scope, err);
+  }
+}
+
 var torrentPropsNotToUpdate = { 'downloadRateLimit': 1 };
 
 /* Helper used to update the $scope's list of torrent data shown in the table 

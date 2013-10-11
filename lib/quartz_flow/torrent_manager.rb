@@ -59,6 +59,13 @@ class TorrentManager
       h[:uploadRateDataOnly] = QuartzTorrent::Formatter.formatSpeed(h[:uploadRateDataOnly])
       h[:dataLength] = QuartzTorrent::Formatter.formatSize(h[:dataLength])
       h[:completedBytes] = QuartzTorrent::Formatter.formatSize(h[:completedBytes])
+      # Sort peers
+      h[:peers].sort! do |a,b|
+        c = (b[:uploadRate].to_i <=> a[:uploadRate].to_i)
+        c = (b[:downloadRate].to_i <=> a[:downloadRate].to_i) if c == 0
+        c
+      end
+      # Format peer rates
       h[:peers].each do |p| 
         p[:uploadRate] = QuartzTorrent::Formatter.formatSpeed(p[:uploadRate])
         p[:downloadRate] = QuartzTorrent::Formatter.formatSpeed(p[:downloadRate])
