@@ -14,17 +14,23 @@ quartzModule.config(function($routeProvider) {
 
 /* Set up function that keeps retrieving torrent data from server on a timer.
    We store the data in the rootScope which means it's available in all scopes. */
-quartzModule.run(function($rootScope, $timeout, $http) {
-  $rootScope.errors = [];
+quartzModule.run(function($rootScope, $timeout, $http, $window) {
+  $rootScope.alerts = {};
 
   $rootScope.deleteRootscopeError = function(err){
-    for(var i = 0; i < $rootScope.errors.length; i++) {
-      if ( $rootScope.errors[i] == err ) {
-        $rootScope.errors.splice(i,1);
-        break;
+    delete $rootScope.alerts[err];
+  }
+
+  $rootScope.rootErrors = function() {
+    var rc = [];
+    for (var key in $rootScope.alerts) {
+      if ($rootScope.alerts.hasOwnProperty(key)) {
+        rc.push(key);
       }
     }
-  }
+    
+    return rc;
+  };
 
   // Load the list of torrent data every 1 second.
   var refresh = function() {
@@ -40,9 +46,12 @@ quartzModule.run(function($rootScope, $timeout, $http) {
       error(function(data,status,headers,config){
         $rootScope.torrents = [];
         updateTableTorrentData($rootScope);
-        if($rootScope.errors.length < 5 && $rootScope.errors.indexOf(msg) == -1) {
-          $rootScope.errors.push(msg);
-          console.log("get /torrent_data error: " + status);
+        if ( status == 0 ){
+          $rootScope.alerts[msg] = 1;
+        } else if (data == "Authentication required" ) {
+          $window.location.href = '/login';
+        } else {
+          $rootScope.alerts[data] = 1;
         }
       });
 
@@ -55,9 +64,6 @@ quartzModule.run(function($rootScope, $timeout, $http) {
 function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
   $scope.errors = [];
 
-  $scope.rootErrors = function() {
-    return $rootScope.errors;
-  };
 
   var checkIframeMessages = function() {
     while( iframeUploadResultMessages.length > 0 ) {

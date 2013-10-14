@@ -70,12 +70,16 @@ class Server < Sinatra::Base
   end
 
   before do
-    # Redirect to login if not authenticated
     if $useAuthentication
       sid = session[:sid]
       if ! SessionStore.instance.valid_session?(sid)
-        session[:redir] = request.path_info
-        request.path_info = "/login"
+        if request.path_info == "/"
+          # Redirect to login if not authenticated
+          session[:redir] = request.path_info
+          request.path_info = "/login"
+        elsif request.path_info != "/login"
+          halt 500, "Authentication required"
+        end
       end
     end
   end
