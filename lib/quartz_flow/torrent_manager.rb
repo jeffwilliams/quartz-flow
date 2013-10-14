@@ -1,7 +1,5 @@
 require 'open-uri'
-require 'quartz_torrent/util'
-require 'quartz_torrent/formatter'
-require 'quartz_torrent/magnet'
+require 'quartz_torrent.rb'
 require 'fileutils'
 
 class TorrentManager
@@ -154,14 +152,14 @@ class TorrentManager
     Dir.new(@torrentFileDir).each do |e|
       if e =~ /\.torrent$/
         path = @torrentFileDir + File::SEPARATOR + e
-        metainfo = Metainfo.createFromFile(path)
+        metainfo = QuartzTorrent::Metainfo.createFromFile(path)
         if metainfo.infoHash == infoHashBytes
           FileUtils.rm path
           break
         end
       end
     end
- 
+
     # Remove torrent settings
     helper = SettingsHelper.new
     helper.deleteForOwner infoHash
