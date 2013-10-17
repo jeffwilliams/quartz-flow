@@ -75,6 +75,10 @@ class TorrentManager
       end
       h[:uploadRateLimit] = QuartzTorrent::Formatter.formatSpeed(h[:uploadRateLimit])
       h[:downloadRateLimit] = QuartzTorrent::Formatter.formatSize(h[:downloadRateLimit])
+
+      h[:completePieces] = d.completePieceBitfield.countSet
+      h[:totalPieces] = d.completePieceBitfield.length
+
       result[asciiInfoHash] = h
     end
     result
