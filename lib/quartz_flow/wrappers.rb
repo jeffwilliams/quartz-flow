@@ -85,6 +85,8 @@ module QuartzTorrent
       result[:uploadRateLimit] = @uploadRateLimit
       result[:downloadRateLimit] = @downloadRateLimit
       result[:ratio] = @ratio
+      result[:bytesUploaded] = @bytesUploaded
+      result[:bytesDownloaded] = @bytesDownloaded
 
       result
     end
