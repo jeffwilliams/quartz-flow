@@ -1,12 +1,18 @@
 require 'rake/testtask'
 require 'rdoc/task'
 
+$gemfile_name = nil
+
 task :default => [:makegem]
 
 task :makegem do
-  system "gem build quartz_flow.gemspec"
+  output = `gem build quartz_flow.gemspec`
+  output.each_line do |line|
+    $gemfile_name = $1 if line =~ /File: (.*)$/
+    print line
+  end
 end
 
-task :devinstall do
-  system "gem install quartz_flow-0.0.1.gem --user-install --ignore-dependencies --no-rdoc --no-ri"
+task :devinstall => [:makegem] do
+  system "gem install #{$gemfile_name} --user-install --ignore-dependencies --no-rdoc --no-ri"
 end
