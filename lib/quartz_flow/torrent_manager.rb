@@ -1,15 +1,20 @@
 require 'open-uri'
 require 'quartz_torrent.rb'
 require 'fileutils'
+require 'quartz_flow/usagetracker'
+require 'thread'
 
 class TorrentManager
-  def initialize(peerClient, torrentFileDir)
+  def initialize(peerClient, torrentFileDir, monthlyResetDay)
     @peerClient = peerClient
     @cachedTorrentData = nil
     @cachedAt = nil
     @cacheLifetime = 2
     @torrentFileDir = torrentFileDir
     @peerClientStopped = false
+    @usageTracker = UsageTracker.new(monthlyResetDay)
+    # Start a thread to keep track of usage.
+    startUsageTrackerThread
   end
 
   attr_reader :peerClient
@@ -78,8 +83,8 @@ class TorrentManager
       h[:bytesUploaded] = QuartzTorrent::Formatter.formatSize(h[:bytesUploaded])
       h[:bytesDownloaded] = QuartzTorrent::Formatter.formatSize(h[:bytesDownloaded])
 
-      h[:completePieces] = d.completePieceBitfield.countSet
-      h[:totalPieces] = d.completePieceBitfield.length
+      h[:completePieces] = d.completePieceBitfield ? d.completePieceBitfield.countSet : 0
+      h[:totalPieces] = d.completePieceBitfield ? d.completePieceBitfield.length : 0
 
       result[asciiInfoHash] = h
     end
@@ -195,6 +200,12 @@ class TorrentManager
     @peerClient.setUploadRatio infoHash, ratio
   end
 
+  # Get the usage for the current period of the specified type.
+  # periodType should be one of :daily or :monthly.
+  def currentPeriodUsage(periodType)
+    @usageTracker.currentUsage(periodType).value
+  end
+
   private
   # Helper for starting torrents. Expects a block that when called will add a torrent to the 
   # @peerClient, and return the infoHash.
@@ -210,4 +221,27 @@ class TorrentManager
     val
   end
 
+  # Start a thread to keep track of usage.
+  def startUsageTrackerThread
+    @usageTrackerThread = Thread.new do
+      QuartzTorrent.initThread("torrent_usage_tracking")
+      
+      Thread.current[:stopped] = false
+
+      while ! Thread.current[:stopped]
+        begin
+          sleep 4
+          torrentData = @peerClient.torrentData
+          usage = 0
+          torrentData.each do |k,v|
+            usage += v.bytesUploaded + v.bytesDownloaded
+          end
+          @usageTracker.update(usage)
+        rescue
+          puts "Error in usage tracking thread: #{$!}"
+          puts $!.backtrace.join "\n"
+        end
+      end
+    end
+  end
 end

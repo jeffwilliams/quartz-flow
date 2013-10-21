@@ -81,6 +81,20 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
     genericDeleteError($scope, err);
   }
 
+  $scope.dailyUsage = 0;
+  $scope.monthlyUsage = 0;
+  // Load the usage values
+  var getUsage = function() {
+    $http.get("/usage", {'timeout': 3000}).
+      success(function(data,status,headers,config){
+        $scope.dailyUsage = data.dailyUsage;
+        $scope.monthlyUsage = data.monthlyUsage;
+      })
+
+    $timeout(getUsage, 2000);
+  }
+  $timeout(getUsage, 2000);
+
   $scope.getTimes = function(n){
     var result = [];
     for(var i = 0; i < n; i++){

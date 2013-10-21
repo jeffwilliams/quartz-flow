@@ -57,6 +57,12 @@
           %div{ :class => "input-append" }
             %input{ :class => "span2", :type => "text", "ng-model" => "torrent.ratio" }
             %button{ :class => "btn", :type => "submit" } Change
+  %tr
+    %th Bytes Uploaded
+    %td {{torrent.bytesUploaded}}
+  %tr
+    %th Bytes Downloaded
+    %td {{torrent.bytesDownloaded}}
  
 %h2 Files ({{torrent.info.files.length}})
 
@@ -76,8 +82,10 @@
     %th Port
     %th Upload Rate
     %th Download Rate
+    %th Percent Complete
   %tr{ "ng-repeat" => "peer in torrent.peers" }
     %td {{peer.trackerPeer.ip}}
     %td {{peer.trackerPeer.port}}
     %td {{peer.uploadRate}}
     %td {{peer.downloadRate}}
+    %td {{peer.pctComplete}}

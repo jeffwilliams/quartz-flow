@@ -56,7 +56,10 @@ class Home
       DataMapper.setup(:default, path)
       DataMapper.auto_migrate!
     else
-      puts "Database file already exists. Skipping creation."
+      puts "Database file already exists. Running upgrade."
+      path = "sqlite://#{File.expand_path(@dir)}/db/quartz.sqlite"
+      DataMapper.setup(:default, path)
+      DataMapper.auto_upgrade!
     end
 
   end

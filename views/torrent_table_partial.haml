@@ -14,6 +14,10 @@
     %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
     {{error}}
 
+  %div{ }
+    %p
+      Usage this month: {{monthlyUsage}}, today: {{dailyUsage}}.
+
   %div{ :class => "span4"}
     %form{ "ng-submit" => "downloadTorrentFile()" }
       %fieldset

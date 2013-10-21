@@ -41,6 +41,7 @@ class Server < Sinatra::Base
     set :torrent_log, "log/torrent.log"
     set :password_file, "etc/passwd"
     set :logging, true
+    set :monthly_usage_reset_day, 1
 
     # Load configuration settings
     eval File.open("./etc/quartz.rb","r").read
@@ -65,7 +66,7 @@ class Server < Sinatra::Base
     path = "sqlite://#{Dir.pwd}/#{settings.db_file}"
     DataMapper.setup(:default, path)
 
-    $manager = TorrentManager.new(peerClient, settings.metadir)
+    $manager = TorrentManager.new(peerClient, settings.metadir, settings.monthly_usage_reset_day)
     $manager.startExistingTorrents
   end
 
@@ -136,6 +137,15 @@ class Server < Sinatra::Base
   # torrents with various properties.
   get "/torrent_data" do
     JSON.generate $manager.simplifiedTorrentData
+  end
+
+  # Get usage as a JSON object.
+  get "/usage" do
+    hash = { 
+      :monthlyUsage => QuartzTorrent::Formatter.formatSize($manager.currentPeriodUsage(:monthly)),
+      :dailyUsage => QuartzTorrent::Formatter.formatSize($manager.currentPeriodUsage(:daily))
+    }
+    JSON.generate hash
   end
 
   # Download a .torrent file and start running it.

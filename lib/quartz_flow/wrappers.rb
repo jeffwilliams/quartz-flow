@@ -41,6 +41,11 @@ module QuartzTorrent
       result[:isUs] = @isUs
       result[:uploadRate] = @uploadRate
       result[:downloadRate] = @downloadRate
+      if @bitfield
+        result[:pctComplete] = "%.2f" % (100.0 * @bitfield.countSet / @bitfield.length)
+      else
+        result[:pctComplete] = 0
+      end
 
       result
     end
