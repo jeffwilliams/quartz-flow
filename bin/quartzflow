@@ -125,13 +125,15 @@ def doStart
 
   require 'quartz_flow/server'
 
+  # There is an interaction with Sinatra where we can't register signal handlers until
+  # Sinatra has started (and thus performed it's own registration/reset of the handlers).
+  # The workaround is to wait for the server to start before registering.
   Thread.new do
     begin
       puts "Starting thread"
       stdout = $stdout
       io = File.open('/dev/pts/0','w')
       until Server.running?
-        io.puts "Not running"
         sleep 1
       end
 
