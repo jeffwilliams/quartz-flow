@@ -1,9 +1,10 @@
 QuartzFlow -- A Web-based Bittorrent Client
 ===========================================
 
-A Web-based Bittorrent client that runs under Sinatra.
+A Web-based Bittorrent client. 
 
-QuartzFlow runs as a standalone application which contains a web-server. For the rubyists, it uses Sinatra.
+QuartzFlow runs as a standalone application which contains a web-server. For those familiar with ruby, it uses Sinatra
+to run as a webserver.
 
 
 Installation
@@ -26,11 +27,12 @@ Running
 
 ### Details
 
-QuartzFlow expects to be run in a special directory called a "QuartzFlow Home". This is a regular directory that has 
-had `quartzflow setup` run in it (that is, the command is run with the current directory being the directory to set up).
-This setup creates the necessary directories, copies the needed HTML templates, creates an empty settings database, and 
-creates default settings files. This setup only needs to be performed once per home, and from then on QuartzTorrent can 
-be launched from that directory and use the configured settings.
+QuartzFlow expects to be run in a special "home" directory. This is a regular directory that has 
+had `quartzflow setup` run in it; that is, the command is run with the current directory being the directory to set up.
+This setup creates the necessary environment needed for QuartzTorrent to run. It creates the required subdirectories, 
+copies the HTML templates, creates an empty settings database, and creates default settings files. 
+This setup only needs to be performed once per home, and from then on QuartzTorrent can 
+be launched from that directory.
 
 A successfully setup QuartzTorrent home directory contains the following:
 
@@ -59,3 +61,5 @@ links are persisted.
 `download/`
 
 Downloaded Torrents. By default, downloaded torrent data is written to this directory.
+
+Use the command `quartzflow help` to get help for the various commands.
