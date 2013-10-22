@@ -37,17 +37,26 @@ class SettingsHelper
     v.to_s
   end
 
+  @@saveFilterForSize = Proc.new do |v|
+    if v.nil? || v.length == 0
+      nil
+    else
+      QuartzTorrent::Formatter.parseSize(v) 
+    end
+  end
+  
+
   @@settingsMetainfo = {
     :defaultUploadRateLimit => SettingMetainfo.new(
       :defaultUploadRateLimit,
       :global,
-      Proc.new{ |v| QuartzTorrent::Formatter.parseSize(v) },
+      @@saveFilterForSize,
       Proc.new{ |v| QuartzTorrent::Formatter.formatSpeed(v) }
     ),
     :defaultDownloadRateLimit => SettingMetainfo.new(
       :defaultDownloadRateLimit,
       :global,
-      Proc.new{ |v| QuartzTorrent::Formatter.parseSize(v) },
+      @@saveFilterForSize,
       Proc.new{ |v| QuartzTorrent::Formatter.formatSpeed(v) }
     ),
     :defaultRatio => SettingMetainfo.new(
@@ -59,13 +68,13 @@ class SettingsHelper
     :uploadRateLimit => SettingMetainfo.new(
       :uploadRateLimit,
       :torrent,
-      Proc.new{ |v| QuartzTorrent::Formatter.parseSize(v) },
+      @@saveFilterForSize,
       Proc.new{ |v| QuartzTorrent::Formatter.formatSpeed(v) }
     ),
     :downloadRateLimit => SettingMetainfo.new(
       :downloadRateLimit,
       :torrent,
-      Proc.new{ |v| QuartzTorrent::Formatter.parseSize(v) },
+      @@saveFilterForSize,
       Proc.new{ |v| QuartzTorrent::Formatter.formatSpeed(v) }
     ),
     :ratio => SettingMetainfo.new(
