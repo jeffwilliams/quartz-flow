@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Jeff Williams"]
   s.files       = Dir['bin/*'] + Dir['public/**/*.{css,js,png}'] + Dir['views/*.haml'] + Dir['lib/**/*.rb']  + Dir['etc/*.rb']
   s.homepage    =
-    'https://github.com/jeffwilliams/quartz-torrent'
+    'https://github.com/jeffwilliams/quartz-flow'
   s.has_rdoc = false
   s.executables = ["quartzflow"]
 
