@@ -39,11 +39,19 @@ class TorrentManager
       path = @torrentFileDir + File::SEPARATOR + e
       if e =~ /\.torrent$/
         puts "Starting .torrent '#{path}'"
-        startTorrentFile(path)
+        begin
+          startTorrentFile(path)
+        rescue
+          puts "  Starting .torrent '#{path}' failed: #{$!}"
+        end
       elsif e =~ /\.magnet$/   
         magnet = loadMagnet(path)
         puts "Starting magnet '#{magnet.raw}'"
-        startMagnet magnet
+        begin
+          startMagnet magnet
+        rescue
+          puts "  Starting magnet '#{magnet.raw}' failed: #{$!}"
+        end
       end
     end
   end
