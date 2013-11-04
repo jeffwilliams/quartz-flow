@@ -56,12 +56,25 @@ class TorrentManager
     end
   end
 
-  # Convert torrent data such that:
-  # - The TorrentDataDelegate objects are converted to hashes.
-  def simplifiedTorrentData
+  # Return the torrent data as a hash. If `fields` is non-null, then only those fields are returned.
+  # If `where` is non-null, it should be a hash of fields for which the values must match to be returned.
+  def simplifiedTorrentData(fields, where)
     result = {}
+
+    fieldsHash = {}
+    fields.each{ |e| fieldsHash[e] = true } if fields
+
+    if where
+      w = {}
+      where.each do |k,v|
+        w[k.to_sym] = v
+      end
+      where = w
+    end
+
     torrentData.each do |k,d|
       h = d.to_h
+
       asciiInfoHash = QuartzTorrent::bytesToHex(h[:infoHash])
       h[:infoHash] = asciiInfoHash
       h[:downloadRate] = QuartzTorrent::Formatter.formatSpeed(h[:downloadRate])
@@ -93,6 +106,27 @@ class TorrentManager
 
       h[:completePieces] = d.completePieceBitfield ? d.completePieceBitfield.countSet : 0
       h[:totalPieces] = d.completePieceBitfield ? d.completePieceBitfield.length : 0
+
+      if where
+        matches = true
+        where.each do |k,v|
+          if h[k] != v
+            matches = false
+            break
+          end
+        end
+        next if ! matches
+      end
+
+      if fields
+        newHash = {}
+        h.each do |k,v|
+          if fieldsHash.has_key?(k)
+            newHash[k] = v
+          end
+        end
+        h = newHash
+      end
 
       result[asciiInfoHash] = h
     end

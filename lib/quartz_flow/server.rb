@@ -136,7 +136,11 @@ class Server < Sinatra::Base
   # Get an array of JSON objects that represent a list of current running 
   # torrents with various properties.
   get "/torrent_data" do
-    JSON.generate $manager.simplifiedTorrentData
+    fields = nil
+    fields = JSON.parse(params[:fields]).collect{ |f| f.to_sym } if params[:fields]
+    where = nil
+    where = JSON.parse(params[:where]) if params[:where]
+    JSON.generate $manager.simplifiedTorrentData(fields, where)
   end
 
   # Get usage as a JSON object.

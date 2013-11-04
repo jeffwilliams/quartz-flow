@@ -32,12 +32,26 @@ quartzModule.run(function($rootScope, $timeout, $http, $window) {
     return rc;
   };
 
+});
+
+/* Controller for the torrent table view */
+function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
+  $scope.errors = [];
+  $scope.destroyed = false;
+
+  $scope.$on("$destroy", function(e){
+    console.log("Destroy called for TorrentTableCtrl");
+    $scope.destroyed = true;
+  });
+  console.log("TorrentTableCtrl called");
+
   // Load the list of torrent data every 1 second.
   var refresh = function() {
     // http://code.angularjs.org/1.0.8/docs/api/ng.$http
 
     var msg = "Server is unreachable.";
-    $http.get("/torrent_data", {'timeout': 3000}).
+    var fields = ["recommendedName", "dataLength", "infoHash", "downloadRate", "uploadRate","percentComplete","timeLeft"]
+    $http.get("/torrent_data", {'timeout': 3000, "params": {"fields" : fields } }).
       success(function(data,status,headers,config){
         $rootScope.torrents = data;
         updateTableTorrentData($rootScope);
@@ -55,15 +69,11 @@ quartzModule.run(function($rootScope, $timeout, $http, $window) {
         }
       });
 
-    $timeout(refresh, 1000);
+    if ( ! $scope.destroyed ){
+      $timeout(refresh, 1000);
+    }
   }
   refresh();
-});
-
-/* Controller for the torrent table view */
-function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
-  $scope.errors = [];
-
 
   var checkIframeMessages = function() {
     while( iframeUploadResultMessages.length > 0 ) {
@@ -73,7 +83,9 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
       }
     }
 
-    $timeout(checkIframeMessages, 1000);
+    if ( ! $scope.destroyed ){
+      $timeout(checkIframeMessages, 1000);
+    }
   }
   $timeout(checkIframeMessages, 1000);
 
@@ -91,9 +103,11 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
         $scope.monthlyUsage = data.monthlyUsage;
       })
 
-    $timeout(getUsage, 2000);
+    if ( ! $scope.destroyed ){
+      $timeout(getUsage, 2000);
+    }
   }
-  $timeout(getUsage, 2000);
+  getUsage();
 
   $scope.getTimes = function(n){
     var result = [];
@@ -217,8 +231,40 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
 }
 
 /* Controller for the torrent details view */
-function TorrentDetailsCtrl($scope, $routeParams, $http) {
-  $scope.torrent = $scope.torrentsForTable[$routeParams.torrent]
+function TorrentDetailsCtrl($scope, $rootScope, $timeout, $routeParams, $http) {
+  $scope.destroyed = false;
+
+  $scope.$on("$destroy", function(e){
+    console.log("Destroy called for TorrentDetailsCtrl");
+    $scope.destroyed = true;
+  });
+
+  // Load the list of torrent data every 1 second.
+  var refresh = function() {
+    // http://code.angularjs.org/1.0.8/docs/api/ng.$http
+
+    var msg = "Server is unreachable.";
+    $http.get("/torrent_data", {'timeout': 3000, "params": {"where" : {"infoHash" : $routeParams.torrent} } }).
+      success(function(data,status,headers,config){
+        $scope.torrent = data[$routeParams.torrent]
+        $rootScope.deleteRootscopeError(msg);
+      }).
+      error(function(data,status,headers,config){
+        $scope.torrent = null
+        if ( status == 0 ){
+          $rootScope.alerts[msg] = 1;
+        } else if (data == "Authentication required" ) {
+          $window.location.href = '/login';
+        } else {
+          $rootScope.alerts[data] = 1;
+        }
+      });
+
+    if ( ! $scope.destroyed ){
+      $timeout(refresh, 1000);
+    }
+  }
+  refresh();
 
   $scope.deleteError = function(err){
     genericDeleteError($scope, err);
