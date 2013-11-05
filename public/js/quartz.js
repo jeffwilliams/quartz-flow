@@ -14,7 +14,7 @@ quartzModule.config(function($routeProvider) {
 
 /* Set up function that keeps retrieving torrent data from server on a timer.
    We store the data in the rootScope which means it's available in all scopes. */
-quartzModule.run(function($rootScope, $timeout, $http, $window) {
+quartzModule.run(function($rootScope, $timeout, $http) {
   $rootScope.alerts = {};
 
   $rootScope.deleteRootscopeError = function(err){
@@ -35,7 +35,7 @@ quartzModule.run(function($rootScope, $timeout, $http, $window) {
 });
 
 /* Controller for the torrent table view */
-function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
+function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
   $scope.errors = [];
   $scope.destroyed = false;
 
@@ -231,7 +231,7 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http) {
 }
 
 /* Controller for the torrent details view */
-function TorrentDetailsCtrl($scope, $rootScope, $timeout, $routeParams, $http) {
+function TorrentDetailsCtrl($scope, $rootScope, $timeout, $routeParams, $http, $window) {
   $scope.destroyed = false;
 
   $scope.$on("$destroy", function(e){
