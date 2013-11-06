@@ -211,6 +211,7 @@ class Server < Sinatra::Base
   # Handle an upload of a torrent file.
   post "/upload_torrent" do
     # See http://www.wooptoot.com/file-upload-with-sinatra
+    halt 500, "Starting torrent file failed: no torrent was given" if ! params['torrentfile']
     path = params['torrentfile'][:tempfile].path
 
     #FileUtils.chmod 0644, path
