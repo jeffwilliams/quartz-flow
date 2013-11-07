@@ -44,6 +44,14 @@ class SettingsHelper
       QuartzTorrent::Formatter.parseSize(v) 
     end
   end
+
+  @@saveFilterForDuration = Proc.new do |v|
+    if v.nil? || v.length == 0
+      nil
+    else
+      QuartzTorrent::Formatter.parseTime(v) 
+    end
+  end
   
 
   @@settingsMetainfo = {
@@ -65,6 +73,12 @@ class SettingsHelper
       @@floatValidator,
       Proc.new{ |v| v.to_f }
     ),
+    :defaultUploadDuration => SettingMetainfo.new(
+      :defaultUploadDuration,
+      :global,
+      @@saveFilterForDuration,
+      Proc.new{ |v| QuartzTorrent::Formatter.formatTime(v) }
+    ),
     :uploadRateLimit => SettingMetainfo.new(
       :uploadRateLimit,
       :torrent,
@@ -83,6 +97,12 @@ class SettingsHelper
       @@floatValidator,
       Proc.new{ |v| v.to_f }
     ),
+    :uploadDuration => SettingMetainfo.new(
+      :uploadDuration,
+      :torrent,
+      @@saveFilterForDuration,
+      Proc.new{ |v| QuartzTorrent::Formatter.formatTime(v) }
+    ),
   }
 
   def set(settingName, value, owner = nil)
@@ -98,7 +118,8 @@ class SettingsHelper
     settingModel = loadWithOwner(settingName, owner)
 
     if ! settingModel
-      Setting.create( :name => settingName, :value => value, :scope => metaInfo.scope, :owner => owner )
+      settingModel = Setting.create( :name => settingName, :value => value, :scope => metaInfo.scope, :owner => owner )
+      settingModel.save
     else
       settingModel.value = value
       settingModel.save

@@ -23,7 +23,7 @@
     %td {{torrent.completePieces}}/{{torrent.totalPieces}}
   %tr
     %th Status
-    %td {{torrent.state}}
+    %td {{stateForDisplay()}}
   %tr
     %th Progress
     %td {{torrent.percentComplete}}%
@@ -36,7 +36,7 @@
   %tr
     %th Download Rate Limit
     %td 
-      %form{ "ng-submit" => "applyDownloadRateLimit()" }
+      %form{ "ng-submit" => "applyChange('downloadRateLimit')" }
         %fieldset
           %div{ :class => "input-append" }
             %input{ :class => "span2", :type => "text", "ng-model" => "torrent.downloadRateLimit" }
@@ -44,7 +44,7 @@
   %tr
     %th Upload Rate Limit
     %td 
-      %form
+      %form{ "ng-submit" => "applyChange('uploadRateLimit')" }
         %fieldset
           %div{ :class => "input-append" }
             %input{ :class => "span2", :type => "text", "ng-model" => "torrent.uploadRateLimit" }
@@ -52,10 +52,18 @@
   %tr
     %th Upload Ratio
     %td 
-      %form
+      %form{ "ng-submit" => "applyChange('ratio')" }
         %fieldset
           %div{ :class => "input-append" }
             %input{ :class => "span2", :type => "text", "ng-model" => "torrent.ratio" }
+            %button{ :class => "btn", :type => "submit" } Change
+  %tr
+    %th Upload Duration Limit
+    %td 
+      %form{ "ng-submit" => "applyChange('uploadDuration')" }
+        %fieldset
+          %div{ :class => "input-append" }
+            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.uploadDuration" }
             %button{ :class => "btn", :type => "submit" } Change
   %tr
     %th Bytes Uploaded

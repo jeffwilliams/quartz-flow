@@ -50,7 +50,7 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
     // http://code.angularjs.org/1.0.8/docs/api/ng.$http
 
     var msg = "Server is unreachable.";
-    var fields = ["recommendedName", "dataLength", "infoHash", "downloadRate", "uploadRate","percentComplete","timeLeft"]
+    var fields = ["recommendedName", "dataLength", "state", "infoHash", "downloadRate", "uploadRate","percentComplete","timeLeft","paused"]
     $http.get("/torrent_data", {'timeout': 3000, "params": {"fields" : fields } }).
       success(function(data,status,headers,config){
         $rootScope.torrents = data;
@@ -233,11 +233,28 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
 /* Controller for the torrent details view */
 function TorrentDetailsCtrl($scope, $rootScope, $timeout, $routeParams, $http, $window) {
   $scope.destroyed = false;
+  $scope.errors = [];
+  $scope.torrent = null;
 
   $scope.$on("$destroy", function(e){
     console.log("Destroy called for TorrentDetailsCtrl");
     $scope.destroyed = true;
   });
+
+  $scope.stateForDisplay = function(){
+    var torrent = $scope.torrent;
+    if ( ! torrent ){
+      return "unknown";
+    }
+
+    var result = torrent.state;
+
+    if ( torrent.paused ){
+      result = result + " (paused)";
+    }
+
+    return result;
+  }
 
   // Load the list of torrent data every 1 second.
   var refresh = function() {
@@ -246,7 +263,12 @@ function TorrentDetailsCtrl($scope, $rootScope, $timeout, $routeParams, $http, $
     var msg = "Server is unreachable.";
     $http.get("/torrent_data", {'timeout': 3000, "params": {"where" : {"infoHash" : $routeParams.torrent} } }).
       success(function(data,status,headers,config){
-        $scope.torrent = data[$routeParams.torrent]
+        if ( ! $scope.torrent ){
+          $scope.torrent = data[$routeParams.torrent]
+        }
+        else {
+          updateTorrentData(data[$routeParams.torrent], $scope.torrent);
+        }
         $rootScope.deleteRootscopeError(msg);
       }).
       error(function(data,status,headers,config){
@@ -270,6 +292,18 @@ function TorrentDetailsCtrl($scope, $rootScope, $timeout, $routeParams, $http, $
     genericDeleteError($scope, err);
   }
 
+  $scope.applyChange = function(propertyName){
+    var json = {"infoHash": $scope.torrent.infoHash};
+    json[propertyName] = $scope.torrent[propertyName];
+    $http.post("/change_torrent", json).
+      success(function(data,status,headers,config){
+        console.log("huzzah, changing setting succeeded");
+      }).
+      error(function(data,status,headers,config){
+        $scope.errors.push(data);
+      });
+  }
+
   $scope.applyDownloadRateLimit = function(){
     $http.post("/change_torrent", {"infoHash": $scope.torrent.infoHash, "downloadRateLimit" : $scope.torrent.downloadRateLimit}).
       success(function(data,status,headers,config){
@@ -284,6 +318,7 @@ function TorrentDetailsCtrl($scope, $rootScope, $timeout, $routeParams, $http, $
 
 /* Controller for the config view */
 function ConfigCtrl($scope, $timeout, $http) {
+  $scope.errors = [];
   $scope.deleteError = function(err){
     genericDeleteError($scope, err);
   }
@@ -315,12 +350,17 @@ function LoginCtrl($scope, $window, $http) {
   $scope.password = null;
 
   $scope.doLogin = function(){
+    var msg = "Server is unreachable.";
     $http.post("/login", {"login": $scope.login, "password" : $scope.password}).
       success(function(data,status,headers,config){
         $window.location.href = '/';
       }).
       error(function(data,status,headers,config){
-        $scope.errors.push(data);
+        if ( status == 0 ){
+          $rootScope.alerts[msg] = 1;
+        } else {
+          $rootScope.alerts[data] = 1;
+        }
       });   
   }
 
@@ -340,10 +380,11 @@ function LoginCtrl($scope, $window, $http) {
   }
 }
 
-var torrentPropsNotToUpdate = { 'downloadRateLimit': 1 };
-
 /* Helper used to update the $scope's list of torrent data shown in the table 
-   from the full data retrieved from the server */
+   from the full data retrieved from the server. One of the useful effects of this 
+   function is that the table model is only changed if the data from the server is
+   different. This means AngularJs won't need to keep updating the view with the same
+   data every time. */
 function updateTableTorrentData($scope) {
   if ( ! $scope.torrents )
     return;
@@ -362,12 +403,7 @@ function updateTableTorrentData($scope) {
       else {
         // Update entry if needed
         existing = $scope.torrentsForTable[key];
-        for (var prop in torrent) {
-          if (torrent.hasOwnProperty(prop)) {
-            if (existing[prop] != torrent[prop] && !torrentPropsNotToUpdate[prop])
-              existing[prop] = torrent[prop];
-          }
-        }
+        updateTorrentData(torrent, existing);
       }
     }
   }
@@ -386,6 +422,20 @@ function updateTableTorrentData($scope) {
   // Set up the current page
   updatePages($scope);
 }
+
+var torrentPropsNotToUpdate = { 'downloadRateLimit': 1, 'uploadRateLimit': 1, 'ratio' : 1, 'uploadDuration' : 1 };
+
+/* srcTorrent should be a JSON object representing torrent data retrieved from the server.
+*/
+function updateTorrentData(srcTorrent, dstTorrent){
+  for (var prop in srcTorrent) { 
+    if (srcTorrent.hasOwnProperty(prop)) {
+      if (dstTorrent[prop] != srcTorrent[prop] && !torrentPropsNotToUpdate[prop])
+        dstTorrent[prop] = srcTorrent[prop];
+    }
+  }
+}
+
 
 function updatePages($scope) {
   // Set up the current page
