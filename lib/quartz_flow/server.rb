@@ -63,6 +63,7 @@ class Server < Sinatra::Base
     peerClient.start
 
     # Initialize Datamapper
+    #DataMapper::Logger.new($stdout, :debug)
     path = "sqlite://#{Dir.pwd}/#{settings.db_file}"
     DataMapper.setup(:default, path)
 
@@ -131,6 +132,10 @@ class Server < Sinatra::Base
   # to display the config settings
   get "/config" do
     haml :config_partial
+  end
+
+  get "/show_list" do
+    haml :show_list_partial
   end
 
   # Get an array of JSON objects that represent a list of current running 

@@ -8,6 +8,7 @@ quartzModule.config(function($routeProvider) {
     when('/', {controller: TorrentTableCtrl, templateUrl:'/torrent_table'}).
     when('/details/:torrent', {controller: TorrentDetailsCtrl, templateUrl:'/torrent_detail'}).
     when('/config', {controller: ConfigCtrl, templateUrl:'/config'}).
+    when('/show_list', {controller: ShowListCtrl, templateUrl:'/show_list'}).
     otherwise({redirectTo:'/'});
 
 });
@@ -378,6 +379,9 @@ function LoginCtrl($scope, $window, $http) {
   $scope.deleteError = function(err){
     genericDeleteError($scope, err);
   }
+}
+
+function ShowListCtrl($scope) {
 }
 
 /* Helper used to update the $scope's list of torrent data shown in the table 

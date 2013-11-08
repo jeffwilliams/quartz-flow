@@ -9,26 +9,26 @@
     %li{ :class => "active" }
       %a{ :href => "#/config" } Config
 
-  %div{ :class => "alert alert-error", "ng-repeat" => "error in errors" }
+  %div{ :class => "alert alert-danger", "ng-repeat" => "error in errors" }
     %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
     {{error}}
 
   %form{ :class => "form-horizontal", "ng-submit" => "applySettings()"}
-    %div{ :class => "control-group"}
-      %label{ :id => "uploadRateLabel", :class => "control-label", :for => "uploadRate", "data-toggle" => "tooltip", :title => "Default rate limit to apply to new torrents"} Default Upload Rate Limit
-      %div{ :class => 'controls'}
-        %input{ :type => "text", :id => "uploadRate", :placeholder => "Enter rate like '20 KB'", "ng-model" => "globalSettings.defaultUploadRateLimit"}
-    %div{ :class => "control-group"}
-      %label{ :id => "downloadRateLabel", :class => "control-label", :for => "downloadRate", "data-toggle" => "tooltip", :title => "Default rate limit to apply to new torrents"} Default Download Rate Limit
-      %div{ :class => 'controls'}
-        %input{ :type => "text", :id => "downloadRate", :placeholder => "Enter rate like '500 KB'", "ng-model" => "globalSettings.defaultDownloadRateLimit"}
-    %div{ :class => "control-group"}
-      %label{ :id => "ratioLabel", :class => "control-label", :for => "ratio", "data-toggle" => "tooltip", :title => "Default upload ratio to apply to new torrents"} Default Upload Ratio
-      %div{ :class => 'controls'}
-        %input{ :type => "text", :id => "ratio", :placeholder => "Enter decimal number like '1.5'", "ng-model" => "globalSettings.defaultRatio"}
-    %div{ :class => "control-group"}
-      %label{ :id => "uploadDurationLabel", :class => "control-label", :for => "uploadDuration", "data-toggle" => "tooltip", :title => "Default duration to upload once torrent is complete"} Default Upload Duration
-      %div{ :class => 'controls'}
-        %input{ :type => "text", :id => "uploadDuration", :placeholder => "Enter duration like '1h 20m'", "ng-model" => "globalSettings.defaultUploadDuration"}
+    %div{ :class => "form-group"}
+      %label{ :id => "uploadRateLabel", :class => "control-label col-sm-4", :for => "uploadRate", "data-toggle" => "tooltip", :title => "Default rate limit to apply to new torrents"} Default Upload Rate Limit
+      %div{ :class => "col-sm-4" }
+        %input{ :class => "form-control", :type => "text", :id => "uploadRate", :placeholder => "Enter rate like '20 KB'", "ng-model" => "globalSettings.defaultUploadRateLimit"}
+    %div{ :class => "form-group"}
+      %label{ :id => "downloadRateLabel", :class => "control-label col-sm-4 ", :for => "downloadRate", "data-toggle" => "tooltip", :title => "Default rate limit to apply to new torrents"} Default Download Rate Limit
+      %div{ :class => "col-sm-4" }
+        %input{ :class => "form-control", :type => "text", :id => "downloadRate", :placeholder => "Enter rate like '500 KB'", "ng-model" => "globalSettings.defaultDownloadRateLimit"}
+    %div{ :class => "form-group"}
+      %label{ :id => "ratioLabel", :class => "control-label col-sm-4", :for => "ratio", "data-toggle" => "tooltip", :title => "Default upload ratio to apply to new torrents"} Default Upload Ratio
+      %div{ :class => "col-sm-4" }
+        %input{ :class => "form-control", :type => "text", :id => "ratio", :placeholder => "Enter decimal number like '1.5'", "ng-model" => "globalSettings.defaultRatio"}
+    %div{ :class => "form-group"}
+      %label{ :id => "uploadDurationLabel", :class => "control-label col-sm-4", :for => "uploadDuration", "data-toggle" => "tooltip", :title => "Default duration to upload once torrent is complete"} Default Upload Duration
+      %div{ :class => "col-sm-4" }
+        %input{ :class => "form-control", :type => "text", :id => "uploadDuration", :placeholder => "Enter duration like '1h 20m'", "ng-model" => "globalSettings.defaultUploadDuration"}
     %button{ :class => "btn", :type => "submit" } Apply
 

@@ -4,11 +4,11 @@
   %li
     %a{ :href => "#/config" } Config
 
-%div{ :class => "alert alert-error", "ng-repeat" => "error in rootErrors()" }
+%div{ :class => "alert alert-danger", "ng-repeat" => "error in rootErrors()" }
   %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
   {{error}}
 
-%div{ :class => "alert alert-error", "ng-repeat" => "error in errors" }
+%div{ :class => "alert alert-danger", "ng-repeat" => "error in errors" }
   %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
   {{error}}
 

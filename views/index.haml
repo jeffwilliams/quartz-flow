@@ -19,3 +19,19 @@
 
     -# This is the file-upload iframe
     %iframe{ :id => "uploadiframe", :name => "uploadiframe", :onload => 'handleIframeLoad("uploadiframe")' }
+
+    -# File input handling. See http://www.abeautifulsite.net/blog/2013/08/whipping-file-inputs-into-shape-with-bootstrap-3/
+    :javascript
+      console.log("HI");
+      $(document)
+        .on('change', '.btn-file :file', function() {
+          var input = $(this),
+          numFiles = input.get(0).files ? input.get(0).files.length : 1,
+          label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+          console.log("CHANGED: " + label);
+          input.trigger('fileselect', [numFiles, label]);
+
+          var textInput = $(this).parents('.input-group').find(':text');
+          textInput.val(label);
+          
+      });
