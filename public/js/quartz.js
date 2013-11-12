@@ -357,11 +357,7 @@ function LoginCtrl($scope, $window, $http) {
         $window.location.href = '/';
       }).
       error(function(data,status,headers,config){
-        if ( status == 0 ){
-          $rootScope.alerts[msg] = 1;
-        } else {
-          $rootScope.alerts[data] = 1;
-        }
+        $scope.errors.push(data);
       });   
   }
 
