@@ -1,11 +1,5 @@
 %div{ :class => "row"}
-
-  %ul{ :class => "nav nav-pills"}
-    %li{ :class => "active" }
-      %a{ :href => "#" } Main
-    %li
-      %a{ :href => "#/config" } Config
-
+  =locals[:menu]
   %p
 
   %div{ :class => "alert alert-danger", "ng-repeat" => "error in rootErrors()" }

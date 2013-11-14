@@ -1,8 +1,4 @@
-%ul{ :class => "nav nav-pills"}
-  %li
-    %a{ :href => "#" } Main
-  %li
-    %a{ :href => "#/config" } Config
+=locals[:menu]
 
 %div{ :class => "alert alert-danger", "ng-repeat" => "error in rootErrors()" }
   %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;

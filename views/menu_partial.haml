@@ -1,0 +1,9 @@
+%ul{ :class => "nav nav-pills"}
+  - links = locals[:links]
+  - active_link = locals[:active_link]
+  - if links
+    - links.each do |name, path|
+      %li{ :class => "#{name == active_link ? "active" : ""}" }
+        %a{ :href => "#{path}" }
+          = name
+

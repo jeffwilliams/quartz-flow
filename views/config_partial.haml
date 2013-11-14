@@ -3,11 +3,7 @@
 
 %div{ :class => "row"}
 
-  %ul{ :class => "nav nav-pills"}
-    %li
-      %a{ :href => "#" } Main
-    %li{ :class => "active" }
-      %a{ :href => "#/config" } Config
+  =locals[:menu]
 
   %div{ :class => "alert alert-danger", "ng-repeat" => "error in errors" }
     %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;

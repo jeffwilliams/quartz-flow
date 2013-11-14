@@ -1,0 +1,33 @@
+=locals[:menu]
+
+#accordion{:class => "panel-group" }
+  - showsForDisplay = locals[:showsForDisplay]
+  - num = 0
+  - showsForDisplay.each do |head, body|
+    %div{:class => "panel panel-default"}
+      .panel-heading
+        %h4{:class => "panel-title"}
+          %a{ "data-toggle" => "collapse", "data-parent" => "#accordion", :href => "#collapse#{num}" }
+            = head
+      %div{ :id => "collapse#{num}", :class => "panel-collapse collapse #{num == 0 ? "in" : ""}"}
+        .panel-body
+          = body
+    - num += 1
+
+
+-# Tile-based display:
+-#- showsForDisplay = locals[:showsForDisplay]
+-#- colCount = 6
+-#- showsForDisplay.each do |head, body|
+-#  - if colCount >= 6
+-#    %div{ :class => :row }
+-#    - colCount = 0
+-#  %div{ :class => "col-md-2" }
+-#    %div{ :class => "list-group" }
+-#      %div{:class => "list-group-item" }
+-#        %h4{:class => "list-group-item-heading"}
+-#          = head
+-#        %p{:class => "list-group-item-text"}
+-#          = body
+-#  - colCount += 1
+      

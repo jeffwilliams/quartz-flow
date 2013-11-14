@@ -14,6 +14,7 @@ require 'quartz_flow/torrent_manager'
 require 'quartz_flow/settings_helper'
 require 'quartz_flow/authentication'
 require 'quartz_flow/session'
+require 'quartz_flow/plugin'
 require 'fileutils'
 require 'sinatra/base'
 
@@ -29,6 +30,9 @@ class LogConfigurator
     eval File.open(path,"r").read
   end
 end
+
+# Load plugins
+$plugins = Plugin.loadAll
 
 class Server < Sinatra::Base
   configure do
@@ -47,6 +51,16 @@ class Server < Sinatra::Base
     eval File.open("./etc/quartz.rb","r").read
 
     set :root, '.'
+
+    menuLinks = []
+    menuLinks.push ["Main", "/#"]
+    menuLinks.push ["Config", "/#/config"]
+    $plugins.each do |p|
+      p.links.each do |l|
+        menuLinks.push l
+      end
+    end
+    set :menuLinks, menuLinks
 
     raise "The basedir '#{settings.basedir}' does not exist. Please create it." if ! File.directory? settings.basedir
     raise "The metadir '#{settings.metadir}' does not exist. Please create it." if ! File.directory? settings.metadir
@@ -118,24 +132,23 @@ class Server < Sinatra::Base
   # Get the HTML template used by the Angular module 
   # to display the table of running torrents view.
   get "/torrent_table" do
-    haml :torrent_table_partial
+    menu = haml :menu_partial, :locals => { :links => settings.menuLinks, :active_link => "Main" }
+    haml :torrent_table_partial, :locals => { :menu => menu } 
   end
 
   # Get the HTML template used by the Angular module 
   # to display the details of a single running torrent view.
   get "/torrent_detail" do
-    haml :torrent_detail_partial
+    menu = haml :menu_partial, :locals => { :links => settings.menuLinks }
+    haml :torrent_detail_partial, :locals => { :menu => menu } 
   end
 
 
   # Get the HTML template used by the Angular module 
   # to display the config settings
   get "/config" do
-    haml :config_partial
-  end
-
-  get "/show_list" do
-    haml :show_list_partial
+    menu = haml :menu_partial, :locals => { :links => settings.menuLinks, :active_link => "Config" }
+    haml :config_partial, :locals => { :menu => menu } 
   end
 
   # Get an array of JSON objects that represent a list of current running 
@@ -311,5 +324,11 @@ class Server < Sinatra::Base
 
     "OK"
   end
+
+  # Evaluate plugin routes
+
+  $plugins.each do |plugin|
+    eval File.open(plugin.routesFile,"r").read
+  end 
 
 end
