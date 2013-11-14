@@ -1,9 +1,5 @@
 require './plugins/shows/lib/showname_parse'
 
-get "/test" do
-  "This was a successful test!"
-end
-
 get "/show_list" do
   interp = ShowNameInterpreter.new
   def filesUnder(dir)
