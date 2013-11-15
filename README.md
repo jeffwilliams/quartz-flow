@@ -63,3 +63,7 @@ links are persisted.
 Downloaded Torrents. By default, downloaded torrent data is written to this directory.
 
 Use the command `quartzflow help` to get help for the various commands.
+
+`plugins/`
+
+Active quartzflow plugins. 
