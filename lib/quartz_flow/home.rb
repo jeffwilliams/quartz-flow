@@ -14,6 +14,7 @@ class Home
       "public",
       "db",
       "views",
+      "plugins",
     ]
 
     @installRoot = Home.determineAppRoot("quartz_flow")
@@ -62,6 +63,8 @@ class Home
       DataMapper.auto_upgrade!
     end
 
+    # Install plugins.
+    setupPlugins
   end
 
   def self.determineAppRoot(gemname)
@@ -70,6 +73,36 @@ class Home
       Gem.loaded_specs[gemname].full_gem_path
     else
       "."
+    end
+  end
+
+  private
+  
+  def setupPlugins
+    # Find out the latest version of the quartz_flow gem
+    spec = Gem::Specification.find_by_name("quartz_flow")
+    if ! spec
+      puts "Not copying plugins: quartz_flow gem is not installed" 
+      return
+    end
+
+    # If quartz_flow is pre-release, allow loading pre-release plugins.
+    allowPrerelease = spec.version.prerelease?
+
+    Gem::Specification.latest_specs(allowPrerelease).each do |spec|
+      if spec.name =~ /quartz_flow_plugin/
+        puts "Detected installed plugins gem '#{spec.name}'"
+        pluginBase = spec.full_gem_path
+        pluginContentsDir = pluginBase + File::SEPARATOR + "plugins"
+        Dir.new(pluginContentsDir).each do |e|
+          next if e[0,1] == '.'
+          path = pluginContentsDir + File::SEPARATOR + e
+          if File.directory?(path)
+            puts "Copying plugin #{e}"
+            FileUtils.cp_r path, @dir + File::SEPARATOR + "plugins"
+          end
+        end
+      end
     end
   end
 

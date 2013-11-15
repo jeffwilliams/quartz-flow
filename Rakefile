@@ -11,6 +11,8 @@ task :makegem do
     $gemfile_name = $1 if line =~ /File: (.*)$/
     print line
   end
+
+  system "gem build quartz_flow_plugin_shows.gemspec"
 end
 
 task :devinstall => [:makegem] do
