@@ -35,32 +35,32 @@
       %form{ "ng-submit" => "applyChange('downloadRateLimit')" }
         %fieldset
           %div{ :class => "input-append" }
-            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.downloadRateLimit" }
-            %button{ :class => "btn", :type => "submit" } Change
+            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.downloadRateLimit", :placeholder => "Enter rate like '500 KB'" }
+            %button{ :class => "btn btn-sm", :type => "submit" } Change
   %tr
     %th Upload Rate Limit
     %td 
       %form{ "ng-submit" => "applyChange('uploadRateLimit')" }
         %fieldset
           %div{ :class => "input-append" }
-            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.uploadRateLimit" }
-            %button{ :class => "btn", :type => "submit" } Change
+            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.uploadRateLimit", :placeholder => "Enter rate like '20 KB'" }
+            %button{ :class => "btn btn-sm", :type => "submit" } Change
   %tr
     %th Upload Ratio
     %td 
       %form{ "ng-submit" => "applyChange('ratio')" }
         %fieldset
           %div{ :class => "input-append" }
-            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.ratio" }
-            %button{ :class => "btn", :type => "submit" } Change
+            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.ratio", :placeholder => "Enter decimal number like '1.5'" }
+            %button{ :class => "btn btn-sm", :type => "submit" } Change
   %tr
     %th Upload Duration Limit
     %td 
       %form{ "ng-submit" => "applyChange('uploadDuration')" }
         %fieldset
           %div{ :class => "input-append" }
-            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.uploadDuration" }
-            %button{ :class => "btn", :type => "submit" } Change
+            %input{ :class => "span2", :type => "text", "ng-model" => "torrent.uploadDuration", :placeholder => "Enter duration like '1h 20m'" }
+            %button{ :class => "btn btn-sm", :type => "submit" } Change
   %tr
     %th Bytes Uploaded
     %td {{torrent.bytesUploaded}}
