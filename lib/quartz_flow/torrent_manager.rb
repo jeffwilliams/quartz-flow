@@ -102,7 +102,7 @@ class TorrentManager
       h[:uploadRateLimit] = QuartzTorrent::Formatter.formatSpeed(h[:uploadRateLimit])
       h[:downloadRateLimit] = QuartzTorrent::Formatter.formatSize(h[:downloadRateLimit])
       h[:bytesUploaded] = QuartzTorrent::Formatter.formatSize(h[:bytesUploaded])
-      h[:uploadDuration] = QuartzTorrent::Formatter.formatTime(h[:uploadDuration])
+      h[:uploadDuration] = QuartzTorrent::Formatter.formatTime(h[:uploadDuration]) if h[:uploadDuration]
 
       h[:completePieces] = d.completePieceBitfield ? d.completePieceBitfield.countSet : 0
       h[:totalPieces] = d.completePieceBitfield ? d.completePieceBitfield.length : 0
@@ -239,11 +239,12 @@ class TorrentManager
 
     uploadDuration = helper.get(:uploadDuration, :unfiltered, asciiInfoHash)
     uploadDuration = helper.get(:defaultUploadDuration, :unfiltered) if ! uploadDuration
+    uploadDuration = uploadDuration.to_i if uploadDuration
 
     @peerClient.setUploadRateLimit infoHash, uploadRateLimit
     @peerClient.setDownloadRateLimit infoHash, downloadRateLimit
     @peerClient.setUploadRatio infoHash, ratio
-    @peerClient.setUploadDuration infoHash, uploadDuration.to_i
+    @peerClient.setUploadDuration infoHash, uploadDuration
   end
 
   # Get the usage for the current period of the specified type.
