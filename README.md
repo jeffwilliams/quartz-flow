@@ -1,6 +1,9 @@
 QuartzFlow -- A Web-based Bittorrent Client
 ===========================================
 
+[![Gem Version](https://badge.fury.io/rb/quartz_flow.png)](http://badge.fury.io/rb/quartz\_flow)
+
+
 A Web-based Bittorrent client. 
 
 QuartzFlow runs as a standalone application which contains a web-server. For those familiar with ruby, it uses Sinatra
