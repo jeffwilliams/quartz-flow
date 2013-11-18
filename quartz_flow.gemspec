@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   s.has_rdoc = false
   s.executables = ["quartzflow"]
 
-  s.add_runtime_dependency "quartz_torrent"
+  s.add_runtime_dependency "quartz_torrent", '~> 0.1'
   s.add_runtime_dependency "data_mapper", '~> 1.2'
   s.add_runtime_dependency "dm-sqlite-adapter", '~> 1.2'
   s.add_runtime_dependency "dm-types", '~> 1.2'
