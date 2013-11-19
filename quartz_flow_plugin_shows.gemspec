@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
 
   s.name        = 'quartz_flow_plugin_shows'
   s.version     = version
-  s.date        = '2013-11-14'
+  s.date        = Time.new
   s.summary     = "Plugin for quartz_flow that displays downloaded shows"
   s.description = "Plugin for quartz_flow that displays downloaded shows"
   s.authors     = ["Jeff Williams"]
