@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.name        = 'quartz_flow'
   s.version     = version
   s.date        = Time.new
+  s.license     = 'MIT'
   s.summary     = "A web-based bittorrent client"
   s.description = "A web-based bittorrent client"
   s.authors     = ["Jeff Williams"]
