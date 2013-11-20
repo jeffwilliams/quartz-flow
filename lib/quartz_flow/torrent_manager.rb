@@ -8,6 +8,7 @@ class TorrentManager
   def initialize(peerClient, torrentFileDir, monthlyResetDay)
     @peerClient = peerClient
     @cachedTorrentData = nil
+    @cachedTorrentDataMutex = Mutex.new
     @cachedAt = nil
     @cacheLifetime = 2
     @torrentFileDir = torrentFileDir
@@ -15,22 +16,28 @@ class TorrentManager
     @usageTracker = UsageTracker.new(monthlyResetDay)
     # Start a thread to keep track of usage.
     startUsageTrackerThread
+    startTorrentDataThread
   end
 
   attr_reader :peerClient
 
   def torrentData(infoHash = nil)
-    if (! @cachedTorrentData || Time.new - @cachedAt > @cacheLifetime) && ! @peerClientStopped
-      @cachedTorrentData = @peerClient.torrentData
-      @cachedAt = Time.new
+    result = nil
+
+    # The first time, we may need to wait for the thread to load the data.
+    sleep(0.25) while ! @cachedTorrentData
+
+    @cachedTorrentDataMutex.synchronize do
+      result = @cachedTorrentData 
     end
-    
-    @cachedTorrentData
+    result
   end
 
   def stopPeerClient
     @peerClient.stop
     @peerClientStopped = true
+    stopTorrentDataThread
+    stopUsageTrackerThread
   end
 
   # Start torrents that already exist in the torrent file directory
@@ -102,6 +109,7 @@ class TorrentManager
       h[:uploadRateLimit] = QuartzTorrent::Formatter.formatSpeed(h[:uploadRateLimit])
       h[:downloadRateLimit] = QuartzTorrent::Formatter.formatSize(h[:downloadRateLimit])
       h[:bytesUploaded] = QuartzTorrent::Formatter.formatSize(h[:bytesUploaded])
+      h[:bytesDownloaded] = QuartzTorrent::Formatter.formatSize(h[:bytesDownloaded])
       h[:uploadDuration] = QuartzTorrent::Formatter.formatTime(h[:uploadDuration]) if h[:uploadDuration]
 
       h[:completePieces] = d.completePieceBitfield ? d.completePieceBitfield.countSet : 0
@@ -290,5 +298,43 @@ class TorrentManager
         end
       end
     end
+  end
+
+  def stopUsageTrackerThread
+    @usageTrackerThread[:stopped] = true
+  end
+
+  # Start a thread to update torrent data
+  def startTorrentDataThread
+    @torrentDataThread = Thread.new do
+      QuartzTorrent.initThread("torrent_data_loader")
+      
+      Thread.current[:stopped] = false
+
+      while ! Thread.current[:stopped]
+        begin
+          timer = Time.new
+          if (! @cachedTorrentData || Time.new - @cachedAt > @cacheLifetime) && ! @peerClientStopped
+            data = @peerClient.torrentData
+            @cachedTorrentDataMutex.synchronize do
+              @cachedTorrentData = data
+              @cachedAt = Time.new
+            end
+          end
+          timer = Time.new - timer
+
+          if timer < @cacheLifetime
+            sleep @cacheLifetime-timer
+          end
+        rescue
+          puts "Error in torrent data loader thread: #{$!}"
+          puts $!.backtrace.join "\n"
+        end
+      end
+    end
+  end
+
+  def stopTorrentDataThread
+    @torrentDataThread[:stopped] = true
   end
 end
