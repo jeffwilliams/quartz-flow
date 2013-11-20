@@ -74,7 +74,11 @@ class Server < Sinatra::Base
     LogConfigurator.configLevels
     peerClient = QuartzTorrent::PeerClient.new(settings.basedir)
     peerClient.port = settings.torrent_port
-    peerClient.start
+    begin
+      peerClient.start
+    rescue Errno::EADDRINUSE
+      raise "Starting torrent peer failed because listening on port #{settings.torrent_port} failed: " + $!.message
+    end
 
     # Initialize Datamapper
     #DataMapper::Logger.new($stdout, :debug)
