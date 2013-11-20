@@ -142,6 +142,7 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
   $scope.downloadTorrentFile = function(){
     $http.post("/download_torrent", {"url": $scope.torrentToDownload}).
       success(function(data,status,headers,config){
+        $scope.torrentToDownload = ''
         console.log("huzzah, downloading torrent succeeded");
       }).
       error(function(data,status,headers,config){
@@ -153,6 +154,7 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
   $scope.startMagnetLink = function(){
     $http.post("/start_magnet", {"url": $scope.magnetToStart}).
       success(function(data,status,headers,config){
+        $scope.magnetToStart = ''
         console.log("huzzah, starting magnet succeeded");
       }).
       error(function(data,status,headers,config){
