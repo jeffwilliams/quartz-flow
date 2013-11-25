@@ -87,6 +87,7 @@ module QuartzTorrent
       result[:metainfoLength] = @metainfoLength
       result[:metainfoCompletedLength] = @metainfoCompletedLength
       result[:paused] = @paused
+      result[:queued] = @queued
       result[:uploadRateLimit] = @uploadRateLimit
       result[:downloadRateLimit] = @downloadRateLimit
       result[:ratio] = @ratio

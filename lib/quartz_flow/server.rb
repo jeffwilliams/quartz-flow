@@ -46,6 +46,8 @@ class Server < Sinatra::Base
     set :password_file, "etc/passwd"
     set :logging, true
     set :monthly_usage_reset_day, 1
+    set :torrent_queue_max_incomplete, 5
+    set :torrent_queue_max_active, 10
 
     # Load configuration settings
     eval File.open("./etc/quartz.rb","r").read
@@ -72,7 +74,7 @@ class Server < Sinatra::Base
       setDefaultLevel :info
     end
     LogConfigurator.configLevels
-    peerClient = QuartzTorrent::PeerClient.new(settings.basedir)
+    peerClient = QuartzTorrent::PeerClient.new(settings.basedir, settings.torrent_queue_max_incomplete, settings.torrent_queue_max_active)
     peerClient.port = settings.torrent_port
     begin
       peerClient.start

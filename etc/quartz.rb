@@ -23,3 +23,10 @@ set :torrent_log, "log/torrent.log"
 
 # On which day of the month should monthly usage tracking reset
 set :monthly_usage_reset_day, 5
+
+# Torrent Queueing settings. 
+# Max number of active torrents is the max number of torrents that can be running at once.
+# Max number of incomplete torrents is a subset of the max active torrents, and describes
+# the max number of torrents that can be running that are not uploading.
+set :torrent_queue_max_active, 10
+set :torrent_queue_max_incomplete, 5

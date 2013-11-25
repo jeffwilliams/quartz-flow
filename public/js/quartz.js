@@ -51,7 +51,7 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
     // http://code.angularjs.org/1.0.8/docs/api/ng.$http
 
     var msg = "Server is unreachable.";
-    var fields = ["recommendedName", "dataLength", "state", "infoHash", "downloadRate", "uploadRate","percentComplete","timeLeft","paused"]
+    var fields = ["recommendedName", "dataLength", "state", "infoHash", "downloadRate", "uploadRate","percentComplete","timeLeft","paused","queued"]
     $http.get("/torrent_data", {'timeout': 3000, "params": {"fields" : fields } }).
       success(function(data,status,headers,config){
         $rootScope.torrents = data;
@@ -170,9 +170,13 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
     }
 
     var result = torrent.state;
+    result += " ";
 
     if ( torrent.paused ){
-      result = result + " (paused)";
+      result = result + "(paused)";
+    }
+    if ( torrent.queued ){
+      result = result + "(queued)";
     }
 
     return result;
@@ -251,9 +255,13 @@ function TorrentDetailsCtrl($scope, $rootScope, $timeout, $routeParams, $http, $
     }
 
     var result = torrent.state;
+    result += " ";
 
     if ( torrent.paused ){
-      result = result + " (paused)";
+      result = result + "(paused)";
+    }
+    if ( torrent.queued ){
+      result = result + "(queued)";
     }
 
     return result;
