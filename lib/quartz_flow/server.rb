@@ -217,13 +217,15 @@ class Server < Sinatra::Base
     begin
       $manager.storeMagnet(magnet)
     rescue
+      puts "Storing magnet link failed: #{$!}"
+      puts $!.backtrace.join("\n")
       halt 500, "Storing magnet link failed: #{$!}."
     end
    
     begin
       $manager.startMagnet(magnet)
     rescue
-      puts $!
+      puts "Starting magnet link failed: #{$!}"
       puts $!.backtrace.join("\n")
       halt 500, "Starting magnet link failed: #{$!}."
     end
