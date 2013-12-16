@@ -43,6 +43,9 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
   $scope.$on("$destroy", function(e){
     console.log("Destroy called for TorrentTableCtrl");
     $scope.destroyed = true;
+    if ( $scope.currentPageIndex ){
+      $rootScope.torrentTableCurrentPageIndex = $scope.currentPageIndex;
+    }
   });
   console.log("TorrentTableCtrl called");
 
@@ -56,11 +59,13 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
       success(function(data,status,headers,config){
         $rootScope.torrents = data;
         updateTableTorrentData($rootScope);
+        updatePages($scope, $rootScope);
         $rootScope.deleteRootscopeError(msg);
       }).
       error(function(data,status,headers,config){
         $rootScope.torrents = [];
         updateTableTorrentData($rootScope);
+        updatePages($scope, $rootScope);
         if ( status == 0 ){
           $rootScope.alerts[msg] = 1;
         } else if (data == "Authentication required" ) {
@@ -124,7 +129,7 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
       $scope.currentPageIndex = 0;
     if ( $scope.currentPageIndex >= $scope.totalPages )
       $scope.currentPageIndex = $scope.totalPages - 1;
-    updatePages($scope);
+    updatePages($scope, $rootScope);
     updatePagesInfo($scope);
   }
 
@@ -429,8 +434,6 @@ function updateTableTorrentData($scope) {
     delete $scope.torrentsForTable[toDelete[i]];
   }
 
-  // Set up the current page
-  updatePages($scope);
 }
 
 var torrentPropsNotToUpdate = { 'downloadRateLimit': 1, 'uploadRateLimit': 1, 'ratio' : 1, 'uploadDuration' : 1 };
@@ -447,11 +450,16 @@ function updateTorrentData(srcTorrent, dstTorrent){
 }
 
 
-function updatePages($scope) {
+function updatePages($scope, $rootScope) {
   // Set up the current page
   var pageSize = 5;
-  if( ! $scope.currentPageIndex ) {
-    $scope.currentPageIndex = 0;
+  if( typeof($scope.currentPageIndex) == 'undefined') {
+    if ( typeof($rootScope.torrentTableCurrentPageIndex) != 'undefined' ){
+      $scope.currentPageIndex = $rootScope.torrentTableCurrentPageIndex;
+    }
+    else {
+      $scope.currentPageIndex = 0;
+    }
   }
   $scope.torrentsList = [];
   for (var key in $scope.torrentsForTable) {
@@ -462,7 +470,7 @@ function updatePages($scope) {
   $scope.currentPage = $scope.torrentsList.slice(pageStartIndex, pageEndIndex);
   $scope.totalPages = Math.floor(($scope.torrentsList.length - 1) / pageSize + 1);
 
-  if( ! $scope.pagesInfo || $scope.pagesInfo.length != $scope.totalPages ) {
+  if( typeof($scope.pagesInfo) == 'undefined' || $scope.pagesInfo.length != $scope.totalPages ) {
     updatePagesInfo($scope);
   }
 }
