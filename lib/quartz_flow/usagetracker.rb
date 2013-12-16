@@ -191,7 +191,9 @@ class MonthlyBucketChangeCriteria < BucketChangeCriteria
   def criteriaData
     now = Time.new
     nextMonth = now.mon % 12 + 1
-    Time.local(now.year, nextMonth, @resetDay)
+    year = now.year
+    year += 1 if nextMonth == 1
+    Time.local(year, nextMonth, @resetDay)
   end
 end
 
