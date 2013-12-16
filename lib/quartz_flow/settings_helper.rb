@@ -103,6 +103,12 @@ class SettingsHelper
       @@saveFilterForDuration,
       Proc.new{ |v| QuartzTorrent::Formatter.formatTime(v) }
     ),
+    :paused => SettingMetainfo.new(
+      :paused,
+      :torrent,
+      Proc.new{ |v| v.to_s },
+      Proc.new{ |v| v.downcase == "true" }
+    ),
   }
 
   def set(settingName, value, owner = nil)

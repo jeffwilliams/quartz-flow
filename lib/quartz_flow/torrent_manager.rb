@@ -230,6 +230,15 @@ class TorrentManager
     FileUtils.rm magnetFile if File.exists?(magnetFile)
   end
 
+  # Pause or unpause the specified torrent. Store the pause state in the database.
+  def setTorrentPaused(infoHash, val)
+    infoHashBytes = QuartzTorrent::hexToBytes(infoHash)
+    @peerClient.setPaused infoHashBytes, val
+
+    helper = SettingsHelper.new    
+    helper.set :paused, val, infoHash
+  end
+  
   # Update the torrent settings (upload rate limit, etc) from database values
   def applyTorrentSettings(infoHash)
     asciiInfoHash = QuartzTorrent::bytesToHex(infoHash)
@@ -249,10 +258,13 @@ class TorrentManager
     uploadDuration = helper.get(:defaultUploadDuration, :unfiltered) if ! uploadDuration
     uploadDuration = uploadDuration.to_i if uploadDuration
 
+    paused = helper.get(:paused, :filter, asciiInfoHash)
+
     @peerClient.setUploadRateLimit infoHash, uploadRateLimit
     @peerClient.setDownloadRateLimit infoHash, downloadRateLimit
     @peerClient.setUploadRatio infoHash, ratio
     @peerClient.setUploadDuration infoHash, uploadDuration
+    @peerClient.setPaused infoHash, paused
   end
 
   # Get the usage for the current period of the specified type.

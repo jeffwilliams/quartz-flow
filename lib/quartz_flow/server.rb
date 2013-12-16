@@ -262,7 +262,7 @@ class Server < Sinatra::Base
 
     infoHash = json["infohash"]
     halt 500, "Pausing torrent failed: no infohash parameter was sent to the server in the post request." if !infoHash || infoHash.length == 0
-    $manager.peerClient.setPaused QuartzTorrent::hexToBytes(infoHash), true
+    $manager.setTorrentPaused infoHash, true
     puts "Pausing torrent"
     "OK"
   end
@@ -272,7 +272,7 @@ class Server < Sinatra::Base
 
     infoHash = json["infohash"]
     halt 500, "Unpausing torrent failed: no infohash parameter was sent to the server in the post request." if !infoHash || infoHash.length == 0
-    $manager.peerClient.setPaused QuartzTorrent::hexToBytes(infoHash), false
+    $manager.setTorrentPaused infoHash, false
     "OK"
   end
 
