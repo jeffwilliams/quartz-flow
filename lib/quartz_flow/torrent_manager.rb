@@ -115,6 +115,9 @@ class TorrentManager
       h[:completePieces] = d.completePieceBitfield ? d.completePieceBitfield.countSet : 0
       h[:totalPieces] = d.completePieceBitfield ? d.completePieceBitfield.length : 0
 
+      # Only send 8 alarms
+      h[:alarms] = h[:alarms].first(8)
+
       if where
         matches = true
         where.each do |k,v|

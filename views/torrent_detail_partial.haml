@@ -93,3 +93,14 @@
     %td {{peer.uploadRate}}
     %td {{peer.downloadRate}}
     %td {{peer.pctComplete}}
+
+%h2 Alarms
+
+%table{ :class => "table" }
+  %tr
+    %th Raised
+    %th Details
+  %tr{ "ng-repeat" => "alarm in torrent.alarms" }
+    %td {{alarm.time}}
+    %td {{alarm.details}}
+

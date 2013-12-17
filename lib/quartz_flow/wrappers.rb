@@ -51,6 +51,15 @@ module QuartzTorrent
     end
   end
 
+  class Alarm
+    def to_h
+      result = {}
+      result[:details] = @details
+      result[:time] = @time
+      result
+    end
+  end
+
   class TorrentDataDelegate
     # Convert to a hash. Also flattens some of the data into new fields.
     def to_h
@@ -70,6 +79,8 @@ module QuartzTorrent
           0
         end
       end
+      # Cap estimated time at 9999 hours
+      secondsLeft = 35996400 if secondsLeft > 35996400
       result[:timeLeft] = Formatter.formatTime(secondsLeft)
 
       ## Regular fields
@@ -94,6 +105,7 @@ module QuartzTorrent
       result[:uploadDuration] = @uploadDuration
       result[:bytesUploaded] = @bytesUploaded
       result[:bytesDownloaded] = @bytesDownloaded
+      result[:alarms] = @alarms.collect{ |a| a.to_h }
 
       result
     end
