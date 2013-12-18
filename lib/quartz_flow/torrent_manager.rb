@@ -263,11 +263,16 @@ class TorrentManager
 
     paused = helper.get(:paused, :filter, asciiInfoHash)
 
+    bytesDownloaded = helper.get(:bytesDownloaded, :filter, asciiInfoHash)
+    bytesUploaded = helper.get(:bytesUploaded, :filter, asciiInfoHash)
+
     @peerClient.setUploadRateLimit infoHash, uploadRateLimit
     @peerClient.setDownloadRateLimit infoHash, downloadRateLimit
     @peerClient.setUploadRatio infoHash, ratio
     @peerClient.setUploadDuration infoHash, uploadDuration
     @peerClient.setPaused infoHash, paused
+    @peerClient.adjustBytesDownloaded infoHash, bytesDownloaded if bytesDownloaded
+    @peerClient.adjustBytesUploaded infoHash, bytesUploaded if bytesUploaded
   end
 
   # Get the usage for the current period of the specified type.
@@ -297,6 +302,7 @@ class TorrentManager
       QuartzTorrent.initThread("torrent_usage_tracking")
       
       Thread.current[:stopped] = false
+      helper = SettingsHelper.new
 
       while ! Thread.current[:stopped]
         begin
@@ -305,6 +311,9 @@ class TorrentManager
           usage = 0
           torrentData.each do |k,v|
             usage += v.bytesUploaded + v.bytesDownloaded
+            asciiInfoHash = QuartzTorrent::bytesToHex(k)
+            helper.set :bytesDownloaded, v.bytesDownloaded, asciiInfoHash
+            helper.set :bytesUploaded, v.bytesUploaded, asciiInfoHash
           end
           @usageTracker.update(usage)
         rescue

@@ -109,6 +109,18 @@ class SettingsHelper
       Proc.new{ |v| v.to_s },
       Proc.new{ |v| v.downcase == "true" }
     ),
+    :bytesUploaded => SettingMetainfo.new(
+      :bytesUploaded,
+      :torrent,
+      Proc.new{ |v| v.to_s },
+      Proc.new{ |v| v.to_i }
+    ),
+    :bytesDownloaded => SettingMetainfo.new(
+      :bytesDownloaded,
+      :torrent,
+      Proc.new{ |v| v.to_s},
+      Proc.new{ |v| v.to_i }
+    ),
   }
 
   def set(settingName, value, owner = nil)
