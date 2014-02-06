@@ -1,78 +1,79 @@
-%div{ :class => "row"}
-  =locals[:menu]
+%div
+  %div{ :class => "row"}
+    =locals[:menu]
+    %p
+
+    %div{ :class => "alert alert-danger", "ng-repeat" => "error in rootErrors()" }
+      %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
+      {{error}}
+
+    %div{ :class => "alert alert-danger", "ng-repeat" => "error in errors" }
+      %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
+      {{error}}
+
+    %div{ }
+      %p
+        Usage this month: {{monthlyUsage}}, today: {{dailyUsage}}.
+
+    %div{ :class => "col-md-4"}
+      %form{ "ng-submit" => "downloadTorrentFile()" }
+        %fieldset
+          %label Download using .torrent link
+          %div{ :class => "input-group input-group-sm" }
+            %input{ :class => "form-control", :style => "width: 14em", :type => "text", :placeholder => "paste url", "ng-model" => "torrentToDownload" }
+            %button{ :class => "input-group-addon btn", :style => "width: 4em", :type => "submit" } Get
+    %div{ :class => "col-md-4"}
+      %form{ "ng-submit" => "startMagnetLink()" }
+        %fieldset
+          %label Download using Magnet
+          %div{ :class => "input-group input-group-sm" }
+            %input{ :class => "form-control", :style => "width: 14em", :type => "text", :placeholder => "paste magnet url", "ng-model" => "magnetToStart" }
+            %button{ :class => "input-group-addon btn", :style => "width: 4em", :type => "submit" } Get
+    %div{ :class => "col-md-4"}
+      %form{:method => "post", :enctype => "multipart/form-data", :action => "/upload_torrent", :target => "uploadiframe", :id => "torrent_upload_form" }
+        %fieldset
+          %label Download using .torrent
+          %div{ :class => "input-group input-group-sm" }
+            %span{ :class => "input-group-btn" }
+              %span{ :class => "btn btn-default btn-file" }
+                Browse 
+                %input{ :type => "file", :placeholder => "browse...", :name => "torrentfile" }
+            %input{ :type => "text", :style => "width: 12em", :class => "form-control", :readonly => "" }
+            %button{ :class => "input-group-addon btn", :style => "width: 4em", :type => "submit" } Upload
+
   %p
 
-  %div{ :class => "alert alert-danger", "ng-repeat" => "error in rootErrors()" }
-    %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
-    {{error}}
+  %table{ :class => "table table-striped table-condensed" }
+    %tr
+      %th Name
+      %th Size
+      %th Status
+      %th Rates
+      %th Progress
+      %th ETA
+      %th Actions
+    %tr{ "ng-repeat" => "torrent in currentPage" }
+      %td {{torrent.recommendedName}}
+      %td {{torrent.dataLength}}
+      %td {{stateForDisplay(torrent.infoHash)}}
+      %td {{torrent.downloadRate}}/{{torrent.uploadRate}}
+      %td {{torrent.percentComplete}}%
+      %td {{torrent.timeLeft}}
+      %td 
+        %div{ :class => "dropdown" }
+          %button{ :class => "btn dropdown-toggle", "data-toggle" => "dropdown", :href => "#" } Actions
+          %ul{ :class => "dropdown-menu"}
+            %li
+              %a{ :href =>"#", "ng-click" => "togglePause(torrent.infoHash)" } {{pauseMenuItem(torrent.infoHash)}}
+              %a{ :href =>"#", "ng-click" => "deleteTorrent(torrent.infoHash, false)"} Delete Torrent
+              %a{ :href =>"#", "ng-click" => "deleteTorrent(torrent.infoHash, true)"} Delete Torrent and Files
+              %a{ :href =>"#/details/{{torrent.infoHash}}"} Details
 
-  %div{ :class => "alert alert-danger", "ng-repeat" => "error in errors" }
-    %button{ :type => "button", :class => "close", "ng-click" => "deleteError(error)"} &times;
-    {{error}}
-
-  %div{ }
-    %p
-      Usage this month: {{monthlyUsage}}, today: {{dailyUsage}}.
-
-  %div{ :class => "col-md-4"}
-    %form{ "ng-submit" => "downloadTorrentFile()" }
-      %fieldset
-        %label Download using .torrent link
-        %div{ :class => "input-group input-group-sm" }
-          %input{ :class => "form-control", :style => "width: 14em", :type => "text", :placeholder => "paste url", "ng-model" => "torrentToDownload" }
-          %button{ :class => "input-group-addon btn", :style => "width: 4em", :type => "submit" } Get
-  %div{ :class => "col-md-4"}
-    %form{ "ng-submit" => "startMagnetLink()" }
-      %fieldset
-        %label Download using Magnet
-        %div{ :class => "input-group input-group-sm" }
-          %input{ :class => "form-control", :style => "width: 14em", :type => "text", :placeholder => "paste magnet url", "ng-model" => "magnetToStart" }
-          %button{ :class => "input-group-addon btn", :style => "width: 4em", :type => "submit" } Get
-  %div{ :class => "col-md-4"}
-    %form{:method => "post", :enctype => "multipart/form-data", :action => "/upload_torrent", :target => "uploadiframe", :id => "torrent_upload_form" }
-      %fieldset
-        %label Download using .torrent
-        %div{ :class => "input-group input-group-sm" }
-          %span{ :class => "input-group-btn" }
-            %span{ :class => "btn btn-default btn-file" }
-              Browse 
-              %input{ :type => "file", :placeholder => "browse...", :name => "torrentfile" }
-          %input{ :type => "text", :style => "width: 12em", :class => "form-control", :readonly => "" }
-          %button{ :class => "input-group-addon btn", :style => "width: 4em", :type => "submit" } Upload
-
-%p
-
-%table{ :class => "table table-striped table-condensed" }
-  %tr
-    %th Name
-    %th Size
-    %th Status
-    %th Rates
-    %th Progress
-    %th ETA
-    %th Actions
-  %tr{ "ng-repeat" => "torrent in currentPage" }
-    %td {{torrent.recommendedName}}
-    %td {{torrent.dataLength}}
-    %td {{stateForDisplay(torrent.infoHash)}}
-    %td {{torrent.downloadRate}}/{{torrent.uploadRate}}
-    %td {{torrent.percentComplete}}%
-    %td {{torrent.timeLeft}}
-    %td 
-      %div{ :class => "dropdown" }
-        %button{ :class => "btn dropdown-toggle", "data-toggle" => "dropdown", :href => "#" } Actions
-        %ul{ :class => "dropdown-menu"}
-          %li
-            %a{ :href =>"#", "ng-click" => "togglePause(torrent.infoHash)" } {{pauseMenuItem(torrent.infoHash)}}
-            %a{ :href =>"#", "ng-click" => "deleteTorrent(torrent.infoHash, false)"} Delete Torrent
-            %a{ :href =>"#", "ng-click" => "deleteTorrent(torrent.infoHash, true)"} Delete Torrent and Files
-            %a{ :href =>"#/details/{{torrent.infoHash}}"} Details
-
-%ul{ :class => "pagination pull-right" }
-  %li
-    %a{ :href => "", "ng-click" => "decrementPage()" } Prev
-  %li{ "ng-repeat" => "page in pagesInfo", :class => "{{page.style}}" }
-    %a{ :href => "", "ng-click" => "setPage(page.number)" } {{page.number}}
-  %li
-    %a{ :href => "", "ng-click" => "incrementPage()" } Next
+  %ul{ :class => "pagination pull-right" }
+    %li
+      %a{ :href => "", "ng-click" => "decrementPage()" } Prev
+    %li{ "ng-repeat" => "page in pagesInfo", :class => "{{page.style}}" }
+      %a{ :href => "", "ng-click" => "setPage(page.number)" } {{page.number}}
+    %li
+      %a{ :href => "", "ng-click" => "incrementPage()" } Next
 
