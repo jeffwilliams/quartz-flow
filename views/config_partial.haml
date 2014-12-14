@@ -26,5 +26,9 @@
       %label{ :id => "uploadDurationLabel", :class => "control-label col-sm-4", :for => "uploadDuration", "data-toggle" => "tooltip", :title => "Default duration to upload once torrent is complete"} Default Upload Duration
       %div{ :class => "col-sm-4" }
         %input{ :class => "form-control", :type => "text", :id => "uploadDuration", :placeholder => "Enter duration like '1h 20m'", "ng-model" => "globalSettings.defaultUploadDuration"}
+    %div{ :class => "form-group"}
+      %label{ :id => "itemsPerPageLabel", :class => "control-label col-sm-4", :for => "itemsPerPage", "data-toggle" => "tooltip", :title => "Number of torrents to show per page"} Torrents Per Page
+      %div{ :class => "col-sm-4" }
+        %input{ :class => "form-control", :type => "text", :id => "itemsPerPage", "ng-model" => "globalSettings.itemsPerPage"}
     %button{ :class => "btn", :type => "submit" } Apply
 

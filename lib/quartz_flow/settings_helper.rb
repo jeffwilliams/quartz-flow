@@ -52,7 +52,6 @@ class SettingsHelper
       QuartzTorrent::Formatter.parseTime(v) 
     end
   end
-  
 
   @@settingsMetainfo = {
     :defaultUploadRateLimit => SettingMetainfo.new(
@@ -120,6 +119,10 @@ class SettingsHelper
       :torrent,
       Proc.new{ |v| v.to_s},
       Proc.new{ |v| v.to_i }
+    ),
+    :itemsPerPage => SettingMetainfo.new(
+      :itemsPerPage,
+      :global,
     ),
   }
 

@@ -72,6 +72,16 @@ function TorrentTableCtrl($scope, $rootScope, $timeout, $http, $window) {
   });
   console.log("TorrentTableCtrl called");
 
+  // Get a read-only copy of the global settings
+  $http.get("/global_settings").
+    success(function(data,status,headers,config){
+      $scope.globalSettings = data;
+    }).
+    error(function(data,status,headers,config){
+      $scope.globalSettings = {};
+      $scope.errors.push(data);
+    });
+
   // Load the list of torrent data every 1 second.
   var refresh = function() {
     // http://code.angularjs.org/1.0.8/docs/api/ng.$http
@@ -476,6 +486,10 @@ function updateTorrentData(srcTorrent, dstTorrent){
 function updatePages($scope, $rootScope) {
   // Set up the current page
   var pageSize = 5;
+  if( $scope.globalSettings && $scope.globalSettings.itemsPerPage && $scope.globalSettings.itemsPerPage > 0 ) {
+    pageSize = $scope.globalSettings.itemsPerPage
+  }
+
   if( typeof($scope.currentPageIndex) == 'undefined') {
     if ( typeof($rootScope.torrentTableCurrentPageIndex) != 'undefined' ){
       $scope.currentPageIndex = $rootScope.torrentTableCurrentPageIndex;

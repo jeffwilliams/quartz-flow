@@ -48,6 +48,7 @@ class Server < Sinatra::Base
     set :monthly_usage_reset_day, 1
     set :torrent_queue_max_incomplete, 5
     set :torrent_queue_max_active, 10
+    set :default_items_per_page, 20
 
     # Load configuration settings
     eval File.open("./etc/quartz.rb","r").read
@@ -89,6 +90,10 @@ class Server < Sinatra::Base
 
     $manager = TorrentManager.new(peerClient, settings.metadir, settings.monthly_usage_reset_day)
     $manager.startExistingTorrents
+
+    # Set the default number of items per page
+    sh = SettingsHelper.new
+    sh.set(:itemsPerPage, 20) if ! sh.get(:itemsPerPage)
   end
 
   before do
