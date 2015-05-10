@@ -114,7 +114,6 @@ class ParsedShowName
   def self.parse(rawName, metaInfo)
     rc = []
 
-
     if rawName =~ /^(.*)[sS](\d+)((?:[eE]\d+)+)/
       showName = self.fixShowName($1, metaInfo)
       season = $2.to_i
@@ -140,6 +139,12 @@ class ParsedShowName
       episode = $3.to_i
       rc.push ParsedShowName.create(showName, season, episode)
     end
+
+    if rc.length == 0 && metaInfo && metaInfo.parentDir
+      # If the raw name didn't match, check if it's parent directory matches.
+      rc = parse(File.basename(metaInfo.parentDir), nil)
+    end
+
     rc
   end
 
