@@ -9,6 +9,8 @@ A Web-based Bittorrent client.
 QuartzFlow runs as a standalone application which contains a web-server. For those familiar with ruby, it uses Sinatra
 to run as a webserver.
 
+QuartzFlow requires ruby 1.9 or greater.
+
 
 Installation
 ------------
