@@ -4,7 +4,7 @@ QuartzFlow -- A Web-based Bittorrent Client
 [![Gem Version](https://badge.fury.io/rb/quartz_flow.png)](http://badge.fury.io/rb/quartz\_flow)
 
 
-A Web-based Bittorrent client. 
+A Web-based Bittorrent client.
 
 QuartzFlow runs as a standalone application which contains a web-server. For those familiar with ruby, it uses Sinatra
 to run as a webserver.
@@ -32,11 +32,11 @@ Running
 
 ### Details
 
-QuartzFlow expects to be run in a special "home" directory. This is a regular directory that has 
+QuartzFlow expects to be run in a special "home" directory. This is a regular directory that has
 had `quartzflow setup` run in it; that is, the command is run with the current directory being the directory to set up.
-This setup creates the necessary environment needed for QuartzTorrent to run. It creates the required subdirectories, 
-copies the HTML templates, creates an empty settings database, and creates default settings files. 
-This setup only needs to be performed once per home, and from then on QuartzTorrent can 
+This setup creates the necessary environment needed for QuartzTorrent to run. It creates the required subdirectories,
+copies the HTML templates, creates an empty settings database, and creates default settings files.
+This setup only needs to be performed once per home, and from then on QuartzTorrent can
 be launched from that directory.
 
 A successfully setup QuartzTorrent home directory contains the following:
@@ -45,20 +45,20 @@ A successfully setup QuartzTorrent home directory contains the following:
 
 Static settings. These are things like what port to listen on, and how to log messages.
 
-`db/`       
+`db/`
 
-Dynamic settings. Under this directory is a SQLite database used to store settings that can be changed 
+Dynamic settings. Under this directory is a SQLite database used to store settings that can be changed
 through the webpage.
 
-`log/`      
+`log/`
 
 Logs. By default, logs about torrent downloading and uploading are written here.
 
-`public/, views/`   
+`public/, views/`
 
 Web files. These are the HTML templates, Javascript files, and CSS served when the app is running.
 
-`meta/`     
+`meta/`
 
 Torrent metainformation. This is where downloaded and uploaded .torrent files are stored, and where Magnet
 links are persisted.
@@ -71,4 +71,17 @@ Use the command `quartzflow help` to get help for the various commands.
 
 `plugins/`
 
-Active quartzflow plugins. 
+Active quartzflow plugins.
+
+### Development Setup
+
+The development setup does not use the released gem, rather the current git repository.
+
+1.  Clone this repository and cd into it
+3. `bundle` to download neccessary gems
+2. `bundle exec quartzflow setup`, to create neccessary files, they will be ignored by git
+4. `bundle exec quartzflow` to start server
+
+So basically after the first bundle the instructions are the same, you just need to prefix commands
+with "bundle exec" to use the git versions instead of the gem.
+ 
