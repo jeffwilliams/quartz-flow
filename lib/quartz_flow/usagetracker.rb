@@ -1,4 +1,5 @@
 require 'quartz_flow/model'
+require 'date'
 
 class Bucket
   def initialize(label = nil, criteriaData = nil, value = nil)
@@ -29,7 +30,8 @@ class Bucket
   def fromModel(bucket)
     @label = bucket.label
     @absoluteUsageAtStartOfBucket = bucket.absoluteUsage
-    @criteriaData = bucket.criteriaData
+    # DataMapper's dm-do-adapter 1.2.0 has a bug when using Time fields in ruby 2, so we need to use DateTime when storing.
+    @criteriaData = bucket.criteriaData.to_time
     @value = bucket.value
   end
 
@@ -38,7 +40,8 @@ class Bucket
     model.attributes = { 
       :label => @label,
       :absoluteUsage => @absoluteUsageAtStartOfBucket,
-      :criteriaData => @criteriaData,
+      # DataMapper's dm-do-adapter 1.2.0 has a bug when using Time fields in ruby 2, so we need to use DateTime when storing.
+      :criteriaData => @criteriaData.to_datetime,
       :value => @value
     }
     model
@@ -262,18 +265,6 @@ class UsageTracker
   def saveBucketsToDatastore
     @buckets[:daily].toModel(:daily)
     @buckets[:monthly].toModel(:monthly)
-=begin
-    if @mongoDb
-      dailyCollection = @mongoDb.collection("daily_usage")
-      monthlyCollection = @mongoDb.collection("monthly_usage")
-      # Remove all previous documents
-      dailyCollection.remove
-      monthlyCollection.remove
-
-      dailyCollection.insert @buckets[:daily].toHash
-      monthlyCollection.insert @buckets[:monthly].toHash
-    end
-=end
   end
 
   def loadBucketsFromDatastore
@@ -286,33 +277,6 @@ class UsageTracker
     if @buckets[:daily].current
       @usageForAllTimeAdjustment = @buckets[:daily].current.absoluteUsageAtStartOfBucket + @buckets[:daily].current.value
     end
-  
-=begin
-    if @mongoDb
-      $logger.info "Loading usage from Mongo."
-      dailyCollection = @mongoDb.collection("daily_usage")
-      monthlyCollection = @mongoDb.collection("monthly_usage")
-
-      arr = dailyCollection.find_one
-      @buckets[:daily].fromHash arr if arr
-      arr = monthlyCollection.find_one
-      @buckets[:monthly].fromHash arr if arr
-
-      # If we are loading from Mongo it means that the absolute usage returned from the torrentflow session will not
-      # contain the usage that we previously tracked, so we must add the old tracked value to what the torrentflow
-      # session reports.
-      if @buckets[:daily].current
-        @usageForAllTimeAdjustment = @buckets[:daily].current.absoluteUsageAtStartOfBucket + @buckets[:daily].current.value
-        $logger.info "Absolute usage at start of current daily bucket: " + @buckets[:daily].current.absoluteUsageAtStartOfBucket.to_s
-        $logger.info "Usage in current daily bucket: " + @buckets[:daily].current.value.to_s
-        $logger.info "Usage for all time adjustment: " + @usageForAllTimeAdjustment.to_s
-      else
-        $logger.info "No usage loaded in Mongo (empty collection)."
-      end
-    else
-      $logger.info "Not loading usage from Mongo."
-    end
-=end
   end
 end
 

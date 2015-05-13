@@ -19,7 +19,7 @@ class UsageBucket
   property :type,           Enum[:daily, :monthly]
   property :index,          Integer
   property :label,          String
-  property :criteriaData,   Time
+  property :criteriaData,   DateTime
   property :absoluteUsage,  Integer
   property :value,          Integer
 end
