@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.has_rdoc = false
   s.executables = ["quartzflow"]
 
-  s.required_ruby_version = '~> 1.9'
+  s.required_ruby_version = '>= 1.9.1'
 
   s.add_runtime_dependency "quartz_torrent", '~> 0.2'
   s.add_runtime_dependency "data_mapper", '~> 1.2'
